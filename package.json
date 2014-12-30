@@ -1,0 +1,16 @@
+{
+  "name": "generator-foundry",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://bavellone@bitbucket.org/bavellone/foundry.git"
+  },
+  "author": "Ben Avellone",
+  "keywords": [
+    "yeoman-generator"
+  ],
+  "dependencies": {
+    "yeoman-generator": "^0.18.5"
+  }
+}

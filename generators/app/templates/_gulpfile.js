@@ -1,6 +1,8 @@
 var gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	uglify = require('gulp-uglify'),
+	minCSS = require('gulp-minify-css'),
+	sass = require('gulp-sass'),
 	annotate = require('gulp-ng-annotate'),
 	filesort = require('gulp-angular-filesort'),
 	inject = require('gulp-inject'),
@@ -9,7 +11,8 @@ var gulp = require('gulp'),
 	path = require('path'),
 	_ = require('lodash'),
 	notifier = require('node-notifier'),
-	es = require('event-stream');
+	es = require('event-stream'),
+	filesize = require('gulp-filesize');
 
 var app = {
 	js: ['./public/app/*.js', './public/app/**/*.js'],
@@ -25,15 +28,15 @@ var vendor = {
 		'./bower_components/angular-bootstrap/ui-bootstrap.js'
 	],
 	css: [
-		'./bower_components/bootstrap'
+		'./bower_components/bootstrap/dist/css/bootstrap.css',
+		'./bower_components/bootstrap/dist/css/bootstrap-theme.css'
 	]
 };
 
 var notify = function (msg) {
 	notifier.notify({
-		title: 'Gulp',
-		message:msg,
-		sound: true
+		title: '<%= appName %>',
+		message:msg
 	});
 };
 
@@ -48,7 +51,16 @@ gulp.task('vendorJS', function () {
 	return gulp.src(vendor.js)
 		.pipe(concat('vendor.bundle.js'))
 		.pipe(uglify())
-		.pipe(gulp.dest('./public/assets/js')).on('end', onEnd('Vendor JS compiled!'))
+		.pipe(gulp.dest('./public/assets/js'))
+		.on('end', onEnd('Vendor JS compiled!'))
+});
+
+gulp.task('vendorCSS', function () {
+	return gulp.src(vendor.css)
+		.pipe(concat('vendor.bundle.css'))
+		.pipe(minCSS())
+		.pipe(gulp.dest('./public/assets/css'))
+		.on('end', onEnd('Vendor CSS compiled!'))
 });
 
 gulp.task('appJS', function () {
@@ -57,35 +69,60 @@ gulp.task('appJS', function () {
 		.pipe(filesort())
 		.pipe(concat('app.bundle.js'))
 		.pipe(uglify())
-		.pipe(gulp.dest('./public/assets/js')).on('end', onEnd('App JS compiled!'))
+		.pipe(gulp.dest('./public/assets/js'))
+		.on('end', onEnd('App JS compiled!'))
+});
+
+
+gulp.task('appSCSS', function () {
+	return gulp.src(app.scss)
+		.pipe(concat('app.bundle.css'))
+		.pipe(filesize())
+		.pipe(sass())
+		.pipe(filesize())
+		.pipe(gulp.dest('./public/assets/css'))
+		.on('end', onEnd('App SCSS compiled!'));
 });
 
 
 gulp.task('appHTML', function () {
 	var template = _.template("<script id='<%%= name %>' type='text/ng-template'>\n<%%= content %>\n</script>");
+
+	// Collect html and create script templates
 	var html = gulp.src(app.html)
 		.pipe(tap(function (file) {
 			var filename = path.basename(file.path);
 			file.contents = new Buffer(template({name: filename, content: file.contents}));
 		}));
 
+	// Inject html templates into index.html
 	return gulp.src('./public/index.html')
 		.pipe(inject(html, {
 			name: 'templates',
 			transform: function (filePath, file) {
 				return file.contents.toString('utf-8');
-			}
-		}))
-		.pipe(gulp.dest('./public/')).on('end', onEnd('App HTML compiled!'))
+			}}))
+		.pipe(gulp.dest('./public/'))
+		.on('end', onEnd('App HTML compiled!'))
 });
 
-gulp.task('app', ['appJS', 'appHTML']);
-gulp.task('vendor', ['vendorJS']);
 
+
+
+gulp.task('app', ['appJS', 'appHTML', 'appSCSS']);
+gulp.task('vendor', ['vendorJS', 'vendorCSS']);
+
+gulp.task('fonts', function () {
+	return gulp.src('./bower_components/bootstrap/dist/fonts/*')
+		.pipe(gulp.dest('./public/assets/fonts'));
+});
+
+gulp.task('postInstall', ['fonts', 'app', 'vendor']);
 
 gulp.task('watchApp', function () {
 	gulp.watch(app.js, ['appJS']);
 	gulp.watch(app.html, ['appHTML']);
+	gulp.watch(app.scss, ['appSCSS']);
 	notify('Watching for changes...');
 });
 

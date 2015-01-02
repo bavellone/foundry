@@ -1,28 +1,25 @@
 var yo = require('yeoman-generator'),
 	path = require('path'),
-	_ = require('lodash');
+	_ = require('lodash'),
+	chalk = require('chalk');
 
 module.exports = yo.generators.Base.extend({
-	prompt: function () {
+	prompting: function () {
 		var done = this.async();
-
 		console.log(this.yeoman);
 
 		var prompts = [{
 			name: 'appName',
-			message: 'What is the name of this app?'
+			message: 'App name?',
+			default: this.appname+'App'
 		}];
 
 		this.prompt(prompts, function (props) {
 			this.appName = props.appName;
-			console.log(props);
 			done();
-			console.log('Got prompts');
 		}.bind(this));
 	},
 	skeleton: function () {
-		console.log('Building');
-
 		this.mkdir('public');
 		this.mkdir('public/app');
 		this.mkdir('public/assets');
@@ -31,32 +28,36 @@ module.exports = yo.generators.Base.extend({
 		this.mkdir('public/assets/js');
 	},
 	scaffold: function () {
-		var yo = this,
-			ctx = {
-				appName: this.appName
-			};
-
-		_.map([
+		var yo = this;
+		var templates = [
 			{src: '_bower.json', dest: 'bower.json'},
 			{src: '_gulpfile.js', dest: 'gulpfile.js'},
-			{src: '_index.html', dest: 'app/index.html'},
+			{src: '_index.html', dest: 'public/index.html'},
 			{src: '_package.json', dest: 'package.json'},
 			{src: '_server.js', dest: 'server.js'}
-		], function (tmpl) {
-			yo.template(tmpl.src, tmpl.dest, ctx);
+		];
+
+		_.map(templates, function (tmpl) {
+			yo.template(tmpl.src, tmpl.dest, {appName: yo.appName});
 		});
 
 		this.copy('_.gitignore', '.gitignore');
 	},
-	install: function () {
-		var done = this.async(),
-			yo = this;
-
-		this.installDependencies(function () {
-			// Copy bootstrap fonts
-			yo.copy('', '');
-			console.log('Setup complete!');
-			done();
-		})
+	install: {
+		deps: function () {
+			this.installDependencies();
+		},
+		module: function () {
+			//this.invoke('foundry:ngMod core');
+		}
+	},
+	end: function () {
+		console.log(chalk.green('Running post-install...'));
+		var done = this.async();
+		this.spawnCommand('gulp', ['postInstall'])
+			.on('close', function () {
+				console.log(chalk.green(this.appName + ' ready for development!'));
+				done();
+			}.bind(this));
 	}
 });

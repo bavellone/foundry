@@ -1,7 +1,7 @@
 var restify = require('restify');
 
 var server = restify.createServer({
-	name: 'Raspberry Pi',
+	name: '<%= appName %>',
 	version: '1.0.0'
 });
 

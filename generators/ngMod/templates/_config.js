@@ -4,12 +4,19 @@ angular.module('<%= modName %>.config', ['ui.router'])
 		
 		$stateProvider
 			.state('<%= modName %>', {
-				abstract: true
+				abstract: true,
+				url: '/<%= modURL %>'
 			})
 			.state('<%= modName %>.<%= modState %>', {
-				url: '/<%= modURL %>',
-				templateUrl: '<%= modName %>.<%= modState %>.html',
-				controller: '<%= modName %>Ctrl'
+				views: {
+					'nav@': {
+						template: ''
+					},
+					'content@': {
+						templateUrl: '<%= modName %>.<%= modState %>.html',
+						controller: '<%= modName %>Ctrl'
+					}
+				}
 			})
 	})
 	.run(function () {

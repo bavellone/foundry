@@ -1,0 +1,2 @@
+--reporter mocha-unfunk-reporter
+--require test/config/globals

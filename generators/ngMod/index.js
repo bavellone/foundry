@@ -1,44 +1,59 @@
 var yo = require('yeoman-generator'),
 	path = require('path'),
 	_ = require('lodash'),
-	chalk = require('chalk');
+	chalk = require('chalk'),
+	util = require('util');
 
-module.exports = yo.generators.NamedBase.extend({
-	prompting: function () {
-		var done = this.async();
+var Generator = module.exports = function Generator(args, options) {
+	yo.generators.Base.apply(this, arguments);
 
-		var prompts = [{
-			name: 'modURL',
-			message: 'Base URL?',
-			default: this.name
-		}, {
-			name: 'modState',
-			message: 'Base state?',
-			default: 'index'
-		}];
+	this.modName = this.options.modName || '';
+	this.modURL = this.options.modURL || '';
+	this.modState = this.options.modState || '';
+};
+util.inherits(Generator, yo.generators.Base);
 
-		this.prompt(prompts, function (props) {
-			this.modName = this.name;
-			this.modURL = props.modURL;
-			this.modState = props.modState;
-			done();
-		}.bind(this));
-	},
-	skeleton: function () {
-		this.mkdir('public/app/'+this.name);
-	},
-	scaffold: function () {
-		var templates = [
-			{src: '_app.js', dest: 'app.js'},
-			{src: '_config.js', dest: 'config.js'},
-			{src: '_ctrl.js', dest: 'ctrl.js'},
-			{src: '_home.html', dest: 'home.html'}
-		],
-			yo = this;
 
-		_.map(templates, function (tmpl) {
-			var destPath = './public/app/'+ yo.name +'/'+tmpl.dest;
-			yo.template(tmpl.src, destPath, yo);
-		});
-	}
-});
+Generator.prototype.prompting = function () {
+	var done = this.async();
+
+	var prompts = [{
+		name: 'modName',
+		message: 'Module name?',
+		default: this.modName
+	}, {
+		name: 'modURL',
+		message: 'Base URL?',
+		default: this.modURL
+	}, {
+		name: 'modState',
+		message: 'Base state?',
+		default: this.modState
+	}];
+
+	this.prompt(prompts, function (props) {
+		this.modName = props.modName;
+		this.modURL = props.modURL;
+		this.modState = props.modState;
+		done();
+	}.bind(this));
+};
+
+Generator.prototype.skeleton = function () {
+	this.mkdir('public/app/'+this.modName);
+};
+
+Generator.prototype.scaffold = function () {
+	var templates = [
+		{src: '_app.js', dest: 'app.js'},
+		{src: '_config.js', dest: 'config.js'},
+		{src: '_ctrl.js', dest: 'ctrl.js'},
+		{src: '_home.html', dest: 'home.html'}
+	],
+		yo = this;
+
+	_.map(templates, function (tmpl) {
+		var destPath = './public/app/'+ yo.modName +'/'+tmpl.dest;
+		yo.template(tmpl.src, destPath, yo);
+	});
+};

@@ -12,7 +12,8 @@ var gulp = require('gulp'),
 	_ = require('lodash'),
 	notifier = require('node-notifier'),
 	es = require('event-stream'),
-	filesize = require('gulp-filesize');
+	filesize = require('gulp-filesize'),
+	mocha = require('gulp-mocha');
 
 var app = {
 	js: ['./public/app/*.js', './public/app/**/*.js'],
@@ -119,11 +120,35 @@ gulp.task('fonts', function () {
 
 gulp.task('postInstall', ['fonts', 'app', 'vendor']);
 
-gulp.task('watchApp', function () {
+gulp.task('test', function () {
+	return gulp.src('./test/**/*.js', {read: false})
+		.pipe(mocha({
+			reporter: 'mocha-unfunk-reporter'
+		}))
+		.on('error', function (err) {
+			this.emit('end');
+
+			notifier.notify({
+				title: 'Mocha',
+				message: err.message,
+				sound: true
+			});
+		});
+});
+
+
+gulp.task('watch-test', function () {
+	gulp.watch('./test/**/*.js', ['test']);
+});
+
+gulp.task('watch-app', function () {
 	gulp.watch(app.js, ['appJS']);
 	gulp.watch(app.html, ['appHTML']);
 	gulp.watch(app.scss, ['appSCSS']);
+});
+
+gulp.task('watch', ['watch-app', 'watch-test'], function () {
 	notify('Watching for changes...');
 });
 
-gulp.task('default', ['watchApp']);
+gulp.task('default', ['watch']);

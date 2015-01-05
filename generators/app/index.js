@@ -28,6 +28,8 @@ Generator.prototype.prompting =  function () {
 
 Generator.prototype.skeleton = function () {
 	this.mkdir('test');
+	this.mkdir('test/server');
+	this.mkdir('test/client');
 	this.mkdir('public');
 	this.mkdir('public/app');
 	this.mkdir('public/assets');
@@ -42,12 +44,14 @@ Generator.prototype.scaffold = function () {
 		{src: '_bower.json', dest: 'bower.json'},
 		{src: '_gulpfile.js', dest: 'gulpfile.js'},
 		{src: '_index.html', dest: 'public/index.html'},
+		{src: '_globals.js', dest: 'test/globals.js'},
+		{src: '_mocha.opts', dest: 'test/mocha.opts'},
 		{src: '_package.json', dest: 'package.json'},
 		{src: '_server.js', dest: 'server.js'}
 	];
 
 	_.map(templates, function (tmpl) {
-		yo.template(tmpl.src, tmpl.dest, {appName: yo.appName});
+		yo.template(tmpl.src, tmpl.dest, {appName: yo.appName, globalsPath: 'test/globals'});
 	});
 
 	this.copy('_.gitignore', '.gitignore');

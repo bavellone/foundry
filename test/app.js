@@ -16,19 +16,25 @@ describe('foundry setup', function () {
 
 	describe('foundry:app', function () {
 		describe('files and directories', function () {
-			it('should create a public directory', function () {
+			it('creates a public directory', function () {
 				expect('./public').to.be.a.directory;
 			});
-			it('should minify vendor JS', function () {
+			it('creates all testing files', function () {
+				expect('test/server').to.be.a.directory;
+				expect('test/client').to.be.a.directory;
+				expect('test/globals.js').to.be.a.file;
+				expect('test/mocha.opts').to.be.a.file;
+			});
+			it('minifies vendor JS', function () {
 				expect('public/assets/js/vendor.bundle.js').to.be.a.file();
 			});
-			it('should minify vendor CSS', function () {
+			it('minifies vendor CSS', function () {
 				expect('public/assets/css/vendor.bundle.css').to.be.a.file();
 			});
 		});
 
 		describe('sub-generators', function () {
-			it('should create a new module', function () {
+			it('creates a new module', function () {
 				expect('./public/app/core').to.be.a.directory().and.not.empty;
 			});
 		})

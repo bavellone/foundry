@@ -7,8 +7,8 @@ angular.module('<%= modName %>.config', ['ui.router'])
 				abstract: true
 			})
 			.state('<%= modName %>.<%= modState %>', {
+				url: '/<%= modURL %>',
 				views: {
-					url: '/<%= modURL %>',
 					'nav@': {
 						template: ''
 					},

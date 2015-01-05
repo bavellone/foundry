@@ -4,11 +4,11 @@ angular.module('<%= modName %>.config', ['ui.router'])
 		
 		$stateProvider
 			.state('<%= modName %>', {
-				abstract: true,
-				url: '/<%= modURL %>'
+				abstract: true
 			})
 			.state('<%= modName %>.<%= modState %>', {
 				views: {
+					url: '/<%= modURL %>',
 					'nav@': {
 						template: ''
 					},

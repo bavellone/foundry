@@ -16,12 +16,17 @@ Generator.prototype.prompting =  function () {
 
 	var prompts = [{
 		name: 'appName',
-		message: 'App name?',
+		message: 'App name:',
 		default: this.appname+'App'
+	}, {
+		name: 'appDesc',
+		message: 'App description:',
+		default: ''
 	}];
 
 	this.prompt(prompts, function (props) {
 		this.appName = props.appName;
+		this.appDesc = props.appDesc;
 		done();
 	}.bind(this));
 };
@@ -44,7 +49,6 @@ Generator.prototype.scaffold = function () {
 		{src: '_bower.json', dest: 'bower.json'},
 		{src: '_gulpfile.js', dest: 'gulpfile.js'},
 		{src: '_index.html', dest: 'public/index.html'},
-		{src: '_globals.js', dest: 'test/globals.js'},
 		{src: '_mocha.opts', dest: 'test/mocha.opts'},
 		{src: '_package.json', dest: 'package.json'},
 		{src: '_server.js', dest: 'server.js'}
@@ -56,12 +60,10 @@ Generator.prototype.scaffold = function () {
 
 	this.copy('_.gitignore', '.gitignore');
 	this.copy('_test.js', 'test/app.js');
+	this.copy('_globals.js', 'test/globals.js');
 };
 
 Generator.prototype.install = {
-	deps: function () {
-		this.installDependencies();
-	},
 	module: function () {
 		this.composeWith('foundry:ngMod', {
 			options: {
@@ -70,6 +72,9 @@ Generator.prototype.install = {
 				modState: 'index'
 			}
 		});
+	},
+	deps: function () {
+		this.installDependencies();
 	}
 };
 

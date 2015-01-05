@@ -16,5 +16,5 @@ server.get('/.*/', restify.serveStatic({
 
 
 server.listen(80, function () {
-	console.log('Started server');
+	console.log('Started <%= appName %>');
 });

@@ -48,7 +48,7 @@ Generator.prototype.scaffold = function () {
 		{src: '_app.js', dest: 'app.js'},
 		{src: '_config.js', dest: 'config.js'},
 		{src: '_ctrl.js', dest: 'ctrl.js'},
-		{src: '_home.html', dest: 'home.html'}
+		{src: '_index.html', dest: 'index.html'}
 	],
 		yo = this;
 

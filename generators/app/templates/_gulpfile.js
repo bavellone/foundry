@@ -92,8 +92,9 @@ gulp.task('appHTML', function () {
 	// Collect html and create script templates
 	var html = gulp.src(app.html)
 		.pipe(tap(function (file) {
+			var dirname = path.dirname(file.path).split(path.sep).pop();
 			var filename = path.basename(file.path);
-			file.contents = new Buffer(template({name: filename, content: file.contents}));
+			file.contents = new Buffer(template({name: dirname+'.'+filename, content: file.contents}));
 		}));
 
 	// Inject html templates into index.html

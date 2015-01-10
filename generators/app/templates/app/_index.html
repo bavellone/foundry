@@ -2,9 +2,11 @@
 <html>
 <head lang="en">
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 	<title><%= appName %></title>
-	<script type="text/javascript" src="assets/js/vendor.bundle.js"></script>
-	<link rel="stylesheet" href="assets/css/vendor.bundle.css"/>
+	<script type="text/javascript" src="/assets/js/vendor.bundle.js"></script>
+	<link rel="stylesheet" href="/assets/css/vendor.bundle.css"/>
+	<link rel="stylesheet" href="/assets/css/app.bundle.css"/>
 </head>
 <body ng-app="core">
 
@@ -26,11 +28,11 @@
 		</div>
 	</nav>
 
-	<div class="page-content" ui-view="content"></div>
+	<div class="page-content container-fluid" ui-view="content"></div>
 
 <!-- templates:html -->
 <!-- endinject -->
 
-<script type="text/javascript" src="assets/js/app.bundle.js"></script>
+<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
 </body>
 </html>

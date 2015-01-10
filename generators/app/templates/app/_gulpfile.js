@@ -17,9 +17,9 @@ var gulp = require('gulp'),
 	nodemon = require('gulp-nodemon');
 
 var app = {
-	js: ['./public/app/*.js', './public/app/**/*.js'],
-	html: ['./public/app/*.html', './public/app/**/*.html'],
-	scss: ['./public/app/*.scss', './public/app/**/*.scss']
+	js: ['./public/app/**/*.js'],
+	html: ['./public/app/**/*.html'],
+	scss: ['./public/app/**/*.scss']
 };
 
 var vendor = {
@@ -152,7 +152,10 @@ gulp.task('watch-app', function () {
 gulp.task('watch', ['watch-app', 'watch-test'], function () {
 	nodemon({
 		script: 'server.js',
-		watch: ['server', 'server.js']
+		watch: ['server', 'server.js'],
+		env: {
+			'NODE_ENV': 'dev'
+		}
 	});
 	notify('Watching for changes...');
 });

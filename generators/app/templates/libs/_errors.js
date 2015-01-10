@@ -24,7 +24,7 @@ var getUniqueErrorMessage = function(err) {
  */
 exports.getErrorMessage = function(err) {
 	var message = '';
-	
+
 	if (err.code) {
 		switch (err.code) {
 			case 11000:
@@ -62,7 +62,7 @@ exports.validation = function (res, cb) {
 	return function (err) {
 		if (err)
 			return res.status(400).send(errorHandler.getErrorMessages(err));
-		else
+		else if (typeof(cb) == 'function')
 			cb();
 	}
 };

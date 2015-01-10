@@ -3,7 +3,7 @@
  *
  */
 
-var errorHandler = require('errors.js'),
+var errorHandler = require('./errors'),
 	_ = require('lodash'),
 	express = require('express');
 
@@ -26,7 +26,7 @@ function list(model, ops, fn) {
 		// sort is a string which defines the sort order of the returned documents
 		sort: '-created'
 	});
-	return function(req, res) {
+	return function list(req, res) {
 		fn(req, res);
 		model.find().sort(ops.sort).exec(errorHandler.readModel(res, function (docs) {
 			res.json(docs);
@@ -54,7 +54,7 @@ function read(model, ops, fn) {
 		// sort is a string which defines the sort order of the returned documents
 		sort: '-created'
 	});
-	return function(req, res) {
+	return function read(req, res) {
 		fn(req, res);
 		model.findById(req.params.id, errorHandler.readModel(res, function (doc) {
 			res.json(doc);
@@ -81,14 +81,14 @@ function create(model, ops, fn) {
 		// prior to validation
 		cb: function(model) {return model}
 	});
-	return function (req, res) {
+	return function create(req, res) {
 		fn(req, res);
 		// Create the new model with the POST data
-		var model = ops.cb(new model(req.body));
+		var Model = ops.cb(new model(req.body));
 
 		// Validate the new model
-		model.validate(errorHandler.validation(res, function () {
-			model.save(errorHandler.saveModel(res, function () {
+		Model.validate(errorHandler.validation(res, function () {
+			Model.save(errorHandler.saveModel(res, function () {
 				res.json({success: true});
 			}));
 		}));
@@ -113,7 +113,7 @@ function update(model, ops, fn) {
 
 	});
 
-	return function (req, res) {
+	return function update(req, res) {
 		fn(req, res);
 		model.findById(req.params.id, errorHandler.readModel(res, function (doc) {
 			// Update the model
@@ -147,7 +147,7 @@ function destroy(model, ops, fn) {
 
 	});
 
-	return function (req, res) {
+	return function destroy(req, res) {
 		fn(req, res);
 		model.remove({_id: req.params.id}, errorHandler.readModel(res, function () {
 			res.json({success: true});
@@ -155,6 +155,36 @@ function destroy(model, ops, fn) {
 	}
 }
 
+/**
+ * Returns a function that empties a collection
+ * @param model
+ * @param ops
+ * @param fn
+ * @returns {Function}
+ */
+function emptyDB(model, ops, fn) {
+	if (typeof ops == 'function') {
+		fn = ops;
+		ops = {};
+	}
+	// Defaults
+	_.defaults(ops, {
+
+	});
+
+	return function (req, res) {
+		fn(req, res);
+		model.db.dropCollection(model.collection.name, errorHandler.validation(res));
+	}
+}
+
+/**
+ * Accepts and express-like app, and an api object akin to the one returned by buildAPI()
+ *
+ * @param app
+ * @param api
+ * @returns {*}
+ */
 function crudAPI(app, api) {
 	app.route('/')
 		.get(api.list)
@@ -168,26 +198,41 @@ function crudAPI(app, api) {
 	return app;
 }
 
-module.exports = function (model, ops, fn) {
-	if (typeof ops == 'function') {
-		fn = ops;
-		ops = {};
-	}
-	return crudAPI(express(), {
-		list: list(model, ops, fn),
-		read: read(model, ops, fn),
-		create: create(model, ops, fn),
-		update: update(model, ops, fn),
-		destroy: destroy(model, ops, fn)
-	});
+
+/**
+ *  Returns an object with a REST-ful API attached
+ *
+ * @param model
+ * @param ops
+ * @param fn
+ * @returns {{list: Function, read: Function, create: Function, update: Function, destroy: Function}}
+ */
+function buildAPI(model, ops) {
+	ops = _.defaults({
+		list: function () {},
+		read: function () {},
+		create: function () {},
+		update: function () {},
+		destroy: function () {}
+	}, ops);
+	return {
+		list: list(model, ops, ops.list),
+		read: read(model, ops, ops.read),
+		create: create(model, ops, ops.create),
+		update: update(model, ops, ops.update),
+		destroy: destroy(model, ops, ops.destroy)
+	};
+}
+
+
+
+module.exports = function (model, ops) {
+	// Build the API object
+	var api = buildAPI(model, ops);
+
+	// Create the micro-app
+	var app = express.Router();
+
+	// Attach the CRUD interface
+	return crudAPI(app, api);
 };
-
-
-//exports.emptyDB = function(req, res) {
-//	var db = mongoose.connection.db;
-//	db.dropCollection('equipment', function(err) {
-//		if (!err) {
-//			res.json({'message': 'Success!'});
-//		}
-//	});
-//};

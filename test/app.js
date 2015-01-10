@@ -11,7 +11,7 @@ describe('foundry setup', function () {
 			.inDir(path.join(__dirname, './tmp/app'))
 			.withPrompt({appName: 'testApp'})
 			.on('end', done);
-		this.timeout(60000);
+		this.timeout(80000);
 	});
 
 	describe('foundry:app', function () {
@@ -33,12 +33,20 @@ describe('foundry setup', function () {
 			});
 			it('copies libraries over', function () {
 				expect('server/libs').to.be.a.directory().and.not.empty;
-			})
+			});
+			it('copies server config', function () {
+				expect('server/config').to.be.a.directory().and.not.empty;
+				expect('server/config/env').to.be.a.directory().and.not.empty;
+			});
+			it('copies server init scripts', function () {
+				expect('server/init.js').to.be.a.file();
+				expect('server/api.js').to.be.a.file();
+			});
 		});
 
 		describe('sub-generators', function () {
 			it('creates a new module', function () {
-				expect('./public/app/core').to.be.a.directory().and.not.empty;
+				expect('./public/modules/core').to.be.a.directory().and.not.empty;
 			});
 		})
 	});
@@ -59,7 +67,7 @@ describe('ngMod setup', function () {
 	describe('foundry:ngMod', function () {
 		describe('files and directories', function () {
 			it('creates module files', function () {
-				expect('./public/app/test').to.be.a.directory().and.not.empty;
+				expect('./public/modules/test').to.be.a.directory().and.not.empty;
 			});
 		});
 	});

@@ -1,0 +1,24 @@
+
+
+$bp-lg: 1200px;
+$bp-md: 992px;
+$bp-sm: 768px;
+$bp-xs: 768px;
+
+@mixin bp($point) {
+  @if $point == desktop {
+    @media (min-width: $bp-lg) { @content ; }
+  }
+  @else if $point == laptop {
+    @media (min-width: $bp-md) { @content ; }
+  }
+  @else if $point == tablet {
+    @media (min-width: $bp-sm) { @content ; }
+  }
+  @else if $point == phablet {
+    @media (min-width: $bp-xs)  { @content ; }
+  }
+  @else if $point == mobileonly {
+    @media (max-width: $bp-xs)  { @content ; }
+  }
+}

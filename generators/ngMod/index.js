@@ -40,7 +40,7 @@ Generator.prototype.prompting = function () {
 };
 
 Generator.prototype.skeleton = function () {
-	this.mkdir('public/app/'+this.modName);
+	this.mkdir('public/modules/'+this.modName);
 };
 
 Generator.prototype.scaffold = function () {
@@ -53,7 +53,9 @@ Generator.prototype.scaffold = function () {
 		yo = this;
 
 	_.map(templates, function (tmpl) {
-		var destPath = './public/app/'+ yo.modName +'/'+tmpl.dest;
+		var destPath = './public/modules/'+ yo.modName +'/'+tmpl.dest;
 		yo.template(tmpl.src, destPath, yo);
 	});
+
+	this.copy('_styles.scss', './public/modules/'+ yo.modName + '/styles.scss');
 };

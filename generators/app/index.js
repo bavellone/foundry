@@ -35,6 +35,7 @@ Generator.prototype.skeleton = function () {
 	this.mkdir('test');
 	this.mkdir('test/server');
 	this.mkdir('test/client');
+	this.mkdir('server');
 	this.mkdir('public');
 	this.mkdir('public/app');
 	this.mkdir('public/assets');
@@ -46,21 +47,27 @@ Generator.prototype.skeleton = function () {
 Generator.prototype.scaffold = function () {
 	var yo = this;
 	var templates = [
-		{src: '_bower.json', dest: 'bower.json'},
-		{src: '_gulpfile.js', dest: 'gulpfile.js'},
-		{src: '_index.html', dest: 'public/index.html'},
-		{src: '_mocha.opts', dest: 'test/mocha.opts'},
-		{src: '_package.json', dest: 'package.json'},
-		{src: '_server.js', dest: 'server.js'}
+		{src: 'app/_bower.json', dest: 'bower.json'},
+		{src: 'app/_gulpfile.js', dest: 'gulpfile.js'},
+		{src: 'app/_index.html', dest: 'public/index.html'},
+		{src: 'config/_mocha.opts', dest: 'test/mocha.opts'},
+		{src: 'app/_package.json', dest: 'package.json'},
+		{src: 'app/_server.js', dest: 'server.js'}
 	];
 
 	_.map(templates, function (tmpl) {
 		yo.template(tmpl.src, tmpl.dest, {appName: yo.appName, globalsPath: 'test/globals'});
 	});
 
-	this.copy('_.gitignore', '.gitignore');
-	this.copy('_test.js', 'test/app.js');
-	this.copy('_globals.js', 'test/globals.js');
+	this.copy('config/_.gitignore', '.gitignore');
+	this.copy('app/_test.js', 'test/app.js');
+	this.copy('config/_globals.js', 'test/globals.js');
+};
+
+
+Generator.prototype.copyLibs = function () {
+	this.copy('libs/_crud.js', 'server/libs/crud.js');
+	this.copy('libs/_errors.js', 'server/libs/errors.js');
 };
 
 Generator.prototype.install = {

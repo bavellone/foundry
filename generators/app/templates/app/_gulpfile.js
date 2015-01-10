@@ -13,7 +13,8 @@ var gulp = require('gulp'),
 	notifier = require('node-notifier'),
 	es = require('event-stream'),
 	filesize = require('gulp-filesize'),
-	mocha = require('gulp-mocha');
+	mocha = require('gulp-mocha'),
+	nodemon = require('gulp-nodemon');
 
 var app = {
 	js: ['./public/app/*.js', './public/app/**/*.js'],
@@ -149,6 +150,10 @@ gulp.task('watch-app', function () {
 });
 
 gulp.task('watch', ['watch-app', 'watch-test'], function () {
+	nodemon({
+		script: 'server.js',
+		watch: ['server', 'server.js']
+	});
 	notify('Watching for changes...');
 });
 

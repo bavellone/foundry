@@ -31,6 +31,9 @@ describe('foundry setup', function () {
 			it('minifies vendor CSS', function () {
 				expect('public/assets/css/vendor.bundle.css').to.be.a.file();
 			});
+			it('copies libraries over', function () {
+				expect('server/libs').to.be.a.directory().and.not.empty;
+			})
 		});
 
 		describe('sub-generators', function () {

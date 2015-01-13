@@ -17,9 +17,9 @@ var gulp = require('gulp'),
 	nodemon = require('gulp-nodemon');
 
 var app = {
-	js: ['./public/app/**/*.js'],
-	html: ['./public/app/**/*.html'],
-	scss: ['./public/app/**/*.scss']
+	js: ['./public/modules/**/*.js'],
+	html: ['./public/modules/**/*.html'],
+	scss: ['./public/modules/**/*.scss']
 };
 
 var vendor = {

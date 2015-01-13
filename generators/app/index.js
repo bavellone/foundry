@@ -62,6 +62,7 @@ Generator.prototype.scaffold = function () {
 		{src: 'config/_mocha.opts', dest: 'test/mocha.opts'},
 		{src: 'app/_package.json', dest: 'package.json'},
 		{src: 'app/_server.js', dest: 'server.js'},
+		{src: 'config/_all.js', dest: 'server/config/env/all.js'},
 		{src: 'config/_dev.js', dest: 'server/config/env/dev.js'},
 		{src: 'config/_prod.js', dest: 'server/config/env/prod.js'},
 		{src: 'config/_test.js', dest: 'server/config/env/test.js'}

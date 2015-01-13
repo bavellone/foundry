@@ -1,20 +1,11 @@
-var restify = require('restify');
+var express = require('express'),
+	chalk = require('chalk'),
+	config = require('./server/config/config');
 
-var server = restify.createServer({
-	name: '<%= appName %>',
-	version: '1.0.0'
-});
+var app = express();
 
-server.use(restify.acceptParser(server.acceptable));
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
+require('./server/init.js')(app);
 
-server.get('/.*/', restify.serveStatic({
-	directory: './public',
-	default: 'index.html'
-}));
-
-
-server.listen(80, function () {
-	console.log('Started <%= appName %>');
+app.listen(80, function () {
+	console.log('<%= appName %> Init complete');
 });

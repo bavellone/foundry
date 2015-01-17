@@ -95,7 +95,8 @@ Generator.prototype.install = {
 			options: {
 				modName: 'core',
 				modURL: '',
-				modState: 'index'
+				modState: 'index',
+				useRouter: true
 			}
 		});
 	},

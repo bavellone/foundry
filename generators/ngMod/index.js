@@ -10,6 +10,7 @@ var Generator = module.exports = function Generator(args, options) {
 	this.modName = this.options.modName || '';
 	this.modURL = this.options.modURL || '';
 	this.modState = this.options.modState || '';
+	this.useRouter = this.options.useRouter || true;
 };
 util.inherits(Generator, yo.generators.Base);
 
@@ -19,15 +20,26 @@ Generator.prototype.prompting = function () {
 
 	var prompts = [{
 		name: 'modName',
-		message: 'Module name?',
+		message: 'Name of the module?',
 		default: this.modName
 	}, {
+		name: 'useRouter',
+		type: 'confirm',
+		message: 'Set up routes for this module?',
+		default: this.useRouter
+	}, {
 		name: 'modURL',
-		message: 'Base URL?',
+		message: 'URL of the module?',
+		when: function (ops) {
+			return ops.useRouter
+		},
 		default: this.modURL
 	}, {
 		name: 'modState',
-		message: 'Base state?',
+		message: 'Base state of this module?',
+		when: function (ops) {
+			return ops.useRouter
+		},
 		default: this.modState
 	}];
 
@@ -35,6 +47,7 @@ Generator.prototype.prompting = function () {
 		this.modName = props.modName;
 		this.modURL = props.modURL;
 		this.modState = props.modState;
+		this.useRouter = props.useRouter;
 		done();
 	}.bind(this));
 };
@@ -45,15 +58,28 @@ Generator.prototype.skeleton = function () {
 
 Generator.prototype.scaffold = function () {
 	var templates = [
-		{src: '_app.js', dest: 'app.js'},
-		{src: '_config.js', dest: 'config.js'},
-		{src: '_ctrl.js', dest: 'ctrl.js'},
-		{src: '_index.html', dest: 'index.html'}
+		{src: '_app.js', dest: 'app.js'}
 	],
+		routes = [
+			{src: '_config.js', dest: 'config.js'},
+			{src: '_ctrl.js', dest: 'ctrl.js'},
+			{src: '_index.html', dest: 'index.html'}
+		],
 		yo = this;
 
+	if (this.useRouter) {
+		templates = templates.concat(routes);
+		this.deps = _.map([
+			'ui.bootstrap',
+			'<%= modName %>.ctrl',
+			'<%= modName %>.config'
+		], function (dep) {
+			return '\'' + dep + '\'';
+		}).join(', ');
+	}
+
 	_.map(templates, function (tmpl) {
-		var destPath = './public/modules/'+ yo.modName +'/'+tmpl.dest;
+		var destPath = path.join('./public/modules/', yo.modName, '/'+tmpl.dest);
 		yo.template(tmpl.src, destPath, yo);
 	});
 

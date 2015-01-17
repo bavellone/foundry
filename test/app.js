@@ -52,14 +52,15 @@ describe('foundry setup', function () {
 	});
 });
 
-describe('ngMod setup', function () {
+describe.only('ngMod setup', function () {
 	before(function (done) {
 		helpers.run(path.join(__dirname, '../generators/ngMod'))
 			.inDir(path.join(__dirname, './tmp/ngMod'))
 			.withPrompt({
 				modName: 'test',
-				modURL: 'test',
-				modState: 'test'
+				useRouter: true,
+				modUrl: '',
+				modState: 'index'
 			})
 			.on('end', done);
 	});

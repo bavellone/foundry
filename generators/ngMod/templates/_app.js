@@ -1,4 +1,4 @@
-angular.module('<%= modName %>', ['ui.bootstrap', '<%= modName %>.ctrl', '<%= modName %>.config'])
+angular.module('<%= modName %>', [<%= deps %>])
 	.run(function () {
 		console.log('<%= modName %> initialized');
 	});

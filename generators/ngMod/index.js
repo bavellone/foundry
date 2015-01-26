@@ -9,7 +9,6 @@ var Generator = module.exports = function Generator(args, options) {
 
 	this.modName = this.options.modName || '';
 	this.modURL = this.options.modURL || '';
-	this.modState = this.options.modState || '';
 	this.useRouter = this.options.useRouter || true;
 };
 util.inherits(Generator, yo.generators.Base);
@@ -34,19 +33,11 @@ Generator.prototype.prompting = function () {
 			return ops.useRouter
 		},
 		default: this.modURL
-	}, {
-		name: 'modState',
-		message: 'Base state of this module?',
-		when: function (ops) {
-			return ops.useRouter
-		},
-		default: this.modState
 	}];
 
 	this.prompt(prompts, function (props) {
 		this.modName = props.modName;
 		this.modURL = props.modURL;
-		this.modState = props.modState;
 		this.useRouter = props.useRouter;
 		done();
 	}.bind(this));
@@ -58,25 +49,34 @@ Generator.prototype.skeleton = function () {
 
 Generator.prototype.scaffold = function () {
 	var templates = [
-		{src: '_app.js', dest: 'app.js'}
+		{src: '_app.js', dest: 'app.js'},
+		{src: '_service.js', dest: 'service.js'}
 	],
 		routes = [
 			{src: '_config.js', dest: 'config.js'},
 			{src: '_ctrl.js', dest: 'ctrl.js'},
 			{src: '_index.html', dest: 'index.html'}
 		],
+		deps = [
+			'<%= modName %>.service'
+		],
+		routeDeps = [
+			'<%= modName %>.config',
+			'<%= modName %>.ctrl',
+			'ui.bootstrap'
+		],
 		yo = this;
+
+
 
 	if (this.useRouter) {
 		templates = templates.concat(routes);
-		this.deps = _.map([
-			'ui.bootstrap',
-			'<%= modName %>.ctrl',
-			'<%= modName %>.config'
-		], function (dep) {
-			return '\'' + dep + '\'';
-		}).join(', ');
+		deps = deps.concat(routeDeps);
 	}
+
+	this.depStr = _.map(deps, function (dep) {
+		return '\'' + _.template(dep, yo) + '\'';
+	}).join(', ');
 
 	_.map(templates, function (tmpl) {
 		var destPath = path.join('./public/modules/', yo.modName, '/'+tmpl.dest);

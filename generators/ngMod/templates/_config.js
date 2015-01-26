@@ -5,19 +5,16 @@ angular.module('<%= modName %>.config', ['ui.router'])
 			.state('<%= modName %>', {
 				abstract: true
 			})
-			.state('<%= modName %>.<%= modState %>', {
+			.state('<%= modName %>.index', {
 				url: '/<%= modURL %>',
 				views: {
 					'nav@': {
 						template: ''
 					},
 					'content@': {
-						templateUrl: '<%= modName %>.<%= modState %>.html',
+						templateUrl: '<%= modName %>.index.html',
 						controller: '<%= modName %>Ctrl'
 					}
 				}
 			})
-	})
-	.run(function () {
-
 	});

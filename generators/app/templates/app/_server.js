@@ -6,6 +6,6 @@ var app = express();
 
 require('./server/init.js')(app);
 
-app.listen(80, function () {
+app.listen(config.port, function () {
 	console.log('<%= appName %> Init complete');
 });

@@ -3,7 +3,4 @@ angular.module('<%= modName %>.ctrl', [])
 		$scope.test = {
 			message: "Hello world!"
 		};
-	})
-	.run(function () {
-
 	});

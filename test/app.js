@@ -59,8 +59,7 @@ describe.only('ngMod setup', function () {
 			.withPrompt({
 				modName: 'test',
 				useRouter: true,
-				modUrl: '',
-				modState: 'index'
+				modUrl: ''
 			})
 			.on('end', done);
 	});

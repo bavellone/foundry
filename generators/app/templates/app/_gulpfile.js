@@ -1,48 +1,48 @@
 var gulp = require('gulp'),
-	concat = require('gulp-concat'),
-	uglify = require('gulp-uglify'),
-	minCSS = require('gulp-minify-css'),
-	sass = require('gulp-sass'),
-	annotate = require('gulp-ng-annotate'),
-	filesort = require('gulp-angular-filesort'),
-	inject = require('gulp-inject'),
-	tap = require('gulp-tap'),
-	template = require('gulp-template'),
-	path = require('path'),
+	plugins = require('gulp-load-plugins')({
+		pattern: ['gulp-*', 'gulp.*', 'node-*']
+	}),
 	_ = require('lodash'),
-	notifier = require('node-notifier'),
-	es = require('event-stream'),
-	filesize = require('gulp-filesize'),
-	mocha = require('gulp-mocha'),
-	nodemon = require('gulp-nodemon');
+	path = require('path'),
+	config = require('./server/config/config');
 
 var app = {
-	js: ['./public/modules/**/*.js'],
-	html: ['./public/modules/**/*.html'],
-	scss: ['./public/modules/**/*.scss']
+	js: ['public/app/**/*.js'],
+	html: ['public/app/**/*.html'],
+	scss: ['public/app/**/*.scss'],
+	test: ['test/globals.js', 'test/utils.js', 'server/test/**/*.js', 'server/**/test.js']
 };
 
 var vendor = {
 	js: [
-		'./bower_components/angular/angular.js',
-		'./bower_components/angular-ui-router/release/angular-ui-router.js',
-		'./bower_components/angular-resource/angular-resource.js',
-		'./bower_components/angular-bootstrap/ui-bootstrap.js'
+		'bower_components/angular/angular.js',
+		'bower_components/angular-ui-router/release/angular-ui-router.js',
+		'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
+		'bower_components/lodash/lodash.js',
+		'bower_components/modernizr/modernizr.js',
+		'bower_components/moment/moment.js'
 	],
 	css: [
-		'./bower_components/bootstrap/dist/css/bootstrap.css',
-		'./bower_components/bootstrap/dist/css/bootstrap-theme.css'
+		'bower_components/bootstrap/dist/css/bootstrap.css',
+		'bower_components/bootstrap/dist/css/bootstrap-theme.css',
+		'bower_components/fontawesome/css/font-awesome.css'
+	],
+	fonts: [
+		'bower_components/bootstrap/dist/fonts/*',
+		'bower_components/fontawesome/fonts/*'
 	]
 };
 
 var notify = function (msg) {
-	notifier.notify({
-		title: '<%= appName %>',
+	console.log(msg);
+	plugins.nodeNotifier.notify({
+		title: config.app.title || 'Notification',
 		message:msg
 	});
 };
 
 var onEnd = function (msg) {
+	console.log(msg);
 	return function () {
 		notify(msg);
 	}
@@ -51,38 +51,47 @@ var onEnd = function (msg) {
 
 gulp.task('vendorJS', function () {
 	return gulp.src(vendor.js)
-		.pipe(concat('vendor.bundle.js'))
-		.pipe(uglify())
-		.pipe(gulp.dest('./public/assets/js'))
+		.pipe(plugins.concat('vendor.bundle.js'))
+		.pipe(plugins.bytediff.start())
+		.pipe(plugins.uglify())
+		.pipe(plugins.bytediff.stop())
+		.pipe(gulp.dest('public/assets/js'))
 		.on('end', onEnd('Vendor JS compiled!'))
 });
 
 gulp.task('vendorCSS', function () {
 	return gulp.src(vendor.css)
-		.pipe(concat('vendor.bundle.css'))
-		.pipe(minCSS())
-		.pipe(gulp.dest('./public/assets/css'))
+		.pipe(plugins.concat('vendor.bundle.css'))
+		.pipe(plugins.bytediff.start())
+		.pipe(plugins.minifyCss())
+		.pipe(plugins.bytediff.stop())
+		.pipe(gulp.dest('public/assets/css'))
 		.on('end', onEnd('Vendor CSS compiled!'))
 });
 
 gulp.task('appJS', function () {
 	return gulp.src(app.js)
-		.pipe(annotate())
-		.pipe(filesort())
-		.pipe(concat('app.bundle.js'))
-		.pipe(uglify())
-		.pipe(gulp.dest('./public/assets/js'))
+		.pipe(plugins.ngAnnotate()).on('error', function (err) {
+			console.log('Annotation error',err.message);
+		})
+		.pipe(plugins.angularFilesort())
+		.pipe(plugins.concat('app.bundle.js'))
+		.pipe(plugins.bytediff.start())
+		.pipe(plugins.if(process.env.NODE_ENV == 'prod', plugins.uglify()))
+		.pipe(plugins.bytediff.stop())
+		.pipe(gulp.dest('public/assets/js'))
 		.on('end', onEnd('App JS compiled!'))
 });
 
 
 gulp.task('appSCSS', function () {
 	return gulp.src(app.scss)
-		.pipe(concat('app.bundle.css'))
-		.pipe(filesize())
-		.pipe(sass())
-		.pipe(filesize())
-		.pipe(gulp.dest('./public/assets/css'))
+		.pipe(plugins.concat('app.bundle.css'))
+		.pipe(plugins.sass())
+		.pipe(plugins.bytediff.start())
+		.pipe(plugins.minifyCss())
+		.pipe(plugins.bytediff.stop())
+		.pipe(gulp.dest('public/assets/css'))
 		.on('end', onEnd('App SCSS compiled!'));
 });
 
@@ -92,71 +101,73 @@ gulp.task('appHTML', function () {
 
 	// Collect html and create script templates
 	var html = gulp.src(app.html)
-		.pipe(tap(function (file) {
+		.pipe(plugins.tap(function (file) {
 			var dirname = path.dirname(file.path).split(path.sep).pop();
 			var filename = path.basename(file.path);
 			file.contents = new Buffer(template({name: dirname+'.'+filename, content: file.contents}));
 		}));
 
 	// Inject html templates into index.html
-	return gulp.src('./public/index.html')
-		.pipe(inject(html, {
+	return gulp.src('public/index.html')
+		.pipe(plugins.inject(html, {
 			name: 'templates',
 			transform: function (filePath, file) {
 				return file.contents.toString('utf-8');
 			}}))
-		.pipe(gulp.dest('./public/'))
+		.pipe(gulp.dest('public/'))
 		.on('end', onEnd('App HTML compiled!'))
 });
-
-
 
 
 gulp.task('app', ['appJS', 'appHTML', 'appSCSS']);
 gulp.task('vendor', ['vendorJS', 'vendorCSS']);
 
 gulp.task('fonts', function () {
-	return gulp.src('./bower_components/bootstrap/dist/fonts/*')
-		.pipe(gulp.dest('./public/assets/fonts'));
+	return gulp.src(vendor.fonts)
+		.pipe(gulp.dest('public/assets/fonts'));
 });
 
-gulp.task('postInstall', ['fonts', 'app', 'vendor']);
+gulp.task('build', ['fonts', 'app', 'vendor']);
 
 gulp.task('test', function () {
-	return gulp.src('./test/**/*.js', {read: false})
-		.pipe(mocha({
-			reporter: 'mocha-unfunk-reporter'
+	return gulp.src(app.test, {read: false})
+		.pipe(plugins.mocha({
+			reporter: 'mocha-unfunk-reporter',
+			slow: 15
 		}))
 		.on('error', function (err) {
-			this.emit('end');
-
-			notifier.notify({
+			plugins.nodeNotifier.notify({
 				title: 'Mocha',
 				message: err.message,
 				sound: true
 			});
+			console.log('Error stack', err.stack);
 		});
 });
 
 
-gulp.task('watch-test', function () {
-	gulp.watch('./test/**/*.js', ['test']);
+gulp.task('watch:test', function () {
+	gulp.watch(['server/**/*.js'], ['test']);
 });
 
-gulp.task('watch-app', function () {
+gulp.task('watch:app', function () {
 	gulp.watch(app.js, ['appJS']);
 	gulp.watch(app.html, ['appHTML']);
 	gulp.watch(app.scss, ['appSCSS']);
 });
 
-gulp.task('watch', ['watch-app', 'watch-test'], function () {
-	nodemon({
+gulp.task('watch', ['watch:app', 'watch:test'], function () {
+	plugins.nodemon({
 		script: 'server.js',
 		watch: ['server', 'server.js'],
 		env: {
 			'NODE_ENV': 'dev'
 		}
-	});
+	})
+		.on('stderr', function (err) {
+			console.log('Got error');
+			console.log(err);
+		});
 	notify('Watching for changes...');
 });
 

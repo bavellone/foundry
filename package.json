@@ -10,15 +10,19 @@
   "keywords": [
     "yeoman-generator"
   ],
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
-    "chalk": "^0.5.1",
-    "lodash": "^2.4.1",
-    "yeoman-generator": "^0.18.5"
+    "async": "0.9.0",
+    "chalk": "0.5.1",
+    "lodash": "3.8.0",
+    "yeoman-generator": "0.18.5"
   },
   "devDependencies": {
-    "chai": "^1.10.0",
-    "chai-as-promised": "^4.1.1",
-    "chai-fs": "^0.1.0",
-    "mocha-unfunk-reporter": "^0.4.0"
+    "chai": "1.10.0",
+    "chai-as-promised": "4.1.1",
+    "chai-fs": "0.1.0",
+    "mocha-unfunk-reporter": "0.4.0"
   }
 }

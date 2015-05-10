@@ -2,7 +2,9 @@ var yo = require('yeoman-generator'),
 	path = require('path'),
 	_ = require('lodash'),
 	chalk = require('chalk'),
-	util = require('util');
+	util = require('util'),
+	async = require('async'),
+	crypto = require('crypto');
 
 
 var Generator = module.exports = function Generator(args, options) {
@@ -22,11 +24,30 @@ Generator.prototype.prompting =  function () {
 		name: 'appDesc',
 		message: 'App description:',
 		default: ''
+	}, {
+		name: 'debugEmail',
+		message: 'Enter a debug email address:',
+		default: ''
+	}, {
+		name: 'mailAPIKey',
+		message: 'Enter a Mandrill API key:',
+		default: ''
 	}];
 
 	this.prompt(prompts, function (props) {
 		this.appName = props.appName;
 		this.appDesc = props.appDesc;
+		this.debugEmail = props.debugEmail;
+		this.mailAPIKey = props.mailAPIKey;
+		try {
+			this.authSecret = crypto.randomBytes(16).toString('hex');
+			this.sessSecret = crypto.randomBytes(16).toString('hex');
+		}
+		catch (e) {
+			this.authSecret = '';
+			this.sessSecret = '';
+			console.log("Not enough entropy to generate secret keys, using empty string");
+		}
 		done();
 	}.bind(this));
 };
@@ -38,13 +59,15 @@ Generator.prototype.skeleton = function () {
 	this.mkdir('test');
 	this.mkdir('test/server');
 	this.mkdir('test/client');
+
 	this.mkdir('server');
 	this.mkdir('server/config');
 	this.mkdir('server/config/env');
 	this.mkdir('server/libs');
-	this.mkdir('server/modules');
+	this.mkdir('server/app');
+
 	this.mkdir('public');
-	this.mkdir('public/modules');
+	this.mkdir('public/app');
 	this.mkdir('public/assets');
 	this.mkdir('public/assets/css');
 	this.mkdir('public/assets/fonts');
@@ -67,14 +90,18 @@ Generator.prototype.scaffold = function () {
 		{src: 'config/_prod.js', dest: 'server/config/env/prod.js'},
 		{src: 'config/_test.js', dest: 'server/config/env/test.js'}
 	];
+	var data = {
+		globalsPath: 'test/globals'
+	};
+	var tmplData = _.merge(yo, data);
 
 	_.map(templates, function (tmpl) {
-		yo.template(tmpl.src, tmpl.dest, {appName: yo.appName, globalsPath: 'test/globals'});
+		yo.template(tmpl.src, tmpl.dest, tmplData);
 	});
 
 	this.copy('config/_.gitignore', '.gitignore');
 	this.copy('app/_test.js', 'test/app.js');
-	this.copy('app/_config.scss', 'public/modules/config.scss');
+	this.copy('app/_config.scss', 'public/app/config.scss');
 	this.copy('config/_globals.js', 'test/globals.js');
 	this.copy('config/_config.js', 'server/config/config.js');
 	this.copy('libs/_crud.js', 'server/libs/crud.js');
@@ -95,7 +122,8 @@ Generator.prototype.install = {
 			options: {
 				modName: 'core',
 				modURL: '',
-				useRouter: true
+				useRouter: true,
+				skipPrompts: true
 			}
 		});
 	},
@@ -107,7 +135,7 @@ Generator.prototype.install = {
 Generator.prototype.end = function () {
 	console.log(chalk.green('Running post-install...'));
 	var done = this.async();
-	this.spawnCommand('gulp', ['postInstall'])
+	this.spawnCommand('gulp', ['build'])
 		.on('close', function () {
 			console.log(chalk.green(this.appName + ' ready for development!'));
 			done();

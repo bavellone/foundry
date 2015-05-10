@@ -3,7 +3,7 @@ var config = require('./config/config'),
 	glob = require('glob'),
 	path = require('path');
 
-var routes = _.map(glob.sync('./server/modules/**/app.js'), function (appPath) {
+var routes = _.map(glob.sync('./server/app/**/app.js'), function (appPath) {
 	return {
 		path: path.dirname(path.resolve(appPath)).split(path.sep).pop(), // Name of module
 		app: require(path.resolve(appPath)) // Module API

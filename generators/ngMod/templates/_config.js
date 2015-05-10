@@ -1,5 +1,7 @@
-angular.module('<%= modName %>.config', ['ui.router'])
-	.config(function ($stateProvider) {
+angular.module('<%= modName %>')
+	.config(function ($stateProvider, $urlRouterProvider) {
+
+		$urlRouterProvider.otherwise('/');
 
 		$stateProvider
 			.state('<%= modName %>', {

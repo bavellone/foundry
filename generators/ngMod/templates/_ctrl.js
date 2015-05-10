@@ -1,6 +1,4 @@
-angular.module('<%= modName %>.ctrl', [])
+angular.module('<%= modName %>')
 	.controller('<%= modName %>Ctrl', function ($scope) {
-		$scope.test = {
-			message: "Hello world!"
-		};
+
 	});

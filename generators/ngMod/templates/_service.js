@@ -1,1 +1,1 @@
-angular.module('<%= modName %>.service', []);
+angular.module('<%= modName %>');

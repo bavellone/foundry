@@ -10,6 +10,7 @@ var Generator = module.exports = function Generator(args, options) {
 	this.modName = this.options.modName || '';
 	this.modURL = this.options.modURL || '';
 	this.useRouter = this.options.useRouter || true;
+	this.skipPrompts = this.options.skipPrompts || false;
 };
 util.inherits(Generator, yo.generators.Base);
 
@@ -24,7 +25,7 @@ Generator.prototype.prompting = function () {
 	}, {
 		name: 'useRouter',
 		type: 'confirm',
-		message: 'Set up routes for this module?',
+		message: 'Set up routes for this module? (Deprecated)',
 		default: this.useRouter
 	}, {
 		name: 'modURL',
@@ -35,16 +36,20 @@ Generator.prototype.prompting = function () {
 		default: this.modURL
 	}];
 
-	this.prompt(prompts, function (props) {
-		this.modName = props.modName;
-		this.modURL = props.modURL;
-		this.useRouter = props.useRouter;
+	if (!this.skipPrompts) {
+		this.prompt(prompts, function (props) {
+			this.modName = props.modName;
+			this.modURL = props.modURL;
+			this.useRouter = props.useRouter;
+			done();
+		}.bind(this));
+	}
+	else
 		done();
-	}.bind(this));
 };
 
 Generator.prototype.skeleton = function () {
-	this.mkdir('public/modules/'+this.modName);
+	this.mkdir('public/app/'+this.modName);
 };
 
 Generator.prototype.scaffold = function () {
@@ -57,31 +62,17 @@ Generator.prototype.scaffold = function () {
 			{src: '_ctrl.js', dest: 'ctrl.js'},
 			{src: '_index.html', dest: 'index.html'}
 		],
-		deps = [
-			'<%= modName %>.service'
-		],
-		routeDeps = [
-			'<%= modName %>.config',
-			'<%= modName %>.ctrl',
-			'ui.bootstrap'
-		],
 		yo = this;
 
 
 
-	if (this.useRouter) {
+	if (this.useRouter || true) // Deprecated
 		templates = templates.concat(routes);
-		deps = deps.concat(routeDeps);
-	}
-
-	this.depStr = _.map(deps, function (dep) {
-		return '\'' + _.template(dep, yo) + '\'';
-	}).join(', ');
 
 	_.map(templates, function (tmpl) {
-		var destPath = path.join('./public/modules/', yo.modName, '/'+tmpl.dest);
+		var destPath = path.join('public/app/', yo.modName, '/'+tmpl.dest);
 		yo.template(tmpl.src, destPath, yo);
 	});
 
-	this.copy('_styles.scss', './public/modules/'+ yo.modName + '/styles.scss');
+	this.copy('_styles.scss', 'public/app/'+ yo.modName + '/styles.scss');
 };

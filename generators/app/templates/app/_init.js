@@ -35,7 +35,7 @@ module.exports = function (app) {
 	};
 
 	// Import models
-	_.map(glob.sync('./server/modules/**/model.js'), function (modelPath) {
+	_.map(glob.sync('./server/app/**/model.js'), function (modelPath) {
 		require(path.resolve(modelPath));
 	});
 

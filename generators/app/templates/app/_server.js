@@ -1,6 +1,7 @@
 var express = require('express'),
 	chalk = require('chalk'),
-	config = require('./server/config/config');
+	config = require('./server/config/config'),
+	debug = require('debug')('app:main');
 
 var app = express();
 

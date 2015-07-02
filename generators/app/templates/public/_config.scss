@@ -1,0 +1,121 @@
+$primary-color: #3e7cba;
+$secondary-color: #2c5783;
+
+$gray-bbb: #222;
+$gray-bb: #444;
+$gray-b: #666;
+$gray: #888;
+$gray-w: #aaa;
+$gray-ww: #ccc;
+$gray-www: #eee;
+
+$bp-lg: 1200px;
+$bp-md: 992px;
+$bp-sm: 768px;
+$bp-xs: 640px;
+
+@mixin bp($point) {
+  @if $point == desktop {
+    @media (min-width: $bp-lg) { @content ; }
+  }
+  @else if $point == laptop {
+    @media (min-width: $bp-md) { @content ; }
+  }
+  @else if $point == tablet {
+    @media (min-width: $bp-sm) { @content ; }
+  }
+  @else if $point == phablet {
+    @media (min-width: $bp-xs)  { @content ; }
+  }
+  @else if $point == mobileonly {
+    @media (max-width: $bp-xs)  { @content ; }
+  }
+  @else {
+    @media (min-width: $point) { @content ; }
+  }
+}
+
+/// Computes a top-shadow for a card effect.
+/// @param {Number} $depth - depth level
+/// @return {List}
+@function top-shadow($depth) {
+	$primary-offset: nth(1.5 3 10 14 19, $depth) * 1px;
+	$blur: nth(1.5 3 10 14 19, $depth) * 4px;
+	$color: rgba(black, nth(.12 .16 .19 .25 .30, $depth));
+
+	@return 0 $primary-offset $blur $color;
+}
+
+/// Computes a bottom-shadow for a card effect.
+/// @param {Number} $depth - depth level
+/// @return {List}
+@function bottom-shadow($depth) {
+	$primary-offset: nth(1.5 3 6 10 15, $depth) * 1px;
+	$blur: nth(1 3 3 5 6, $depth) * 4px;
+	$color: rgba(black, nth(.24 .23 .23 .22 .22, $depth));
+
+	@return 0 $primary-offset $blur $color;
+}
+
+/// Gives a card depth effect.
+/// @param {Number} $depth - depth level (between 1 and 5)
+/// @link http://www.google.com/design/spec/layout/layout-principles.html#layout-principles-dimensionality Google Design
+/// @requires {function} top-shadow
+/// @requires {function} bottom-shadow
+@mixin depth($depth) {
+	@if $depth < 1 {
+		box-shadow: none;
+	} @else if $depth > 5 {
+		@warn "Invalid $depth `#{$depth}` for mixin `card`.";
+	} @else {
+		box-shadow: bottom-shadow($depth), top-shadow($depth);
+	}
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	position: relative;
+	background-color: #f6f6f6;
+}
+
+#site-wrapper {
+	min-height: 100%;
+	position: relative;
+}
+
+#site-header {
+
+}
+
+#site-body {
+	padding-bottom: 80px;
+}
+
+#site-footer {
+	background-color: $gray-www;
+	padding: 10px 0;
+	color: $gray;
+	text-align: center;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	border-top: 1px solid #ddd;
+
+	p {
+		margin: 0;
+	}
+}
+
+.list-unstyled {
+	padding: 0;
+	list-style: none;
+}
+
+.overflow-ellipsis {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}

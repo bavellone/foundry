@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<title><%= appName %></title>
+	<script type="text/javascript" defer src="/js/vendor.bundle.js"></script>
+	<link rel="stylesheet" href="/css/vendor.bundle.css"/>
+	<link rel="stylesheet" href="/css/app.bundle.css"/>
+
+	<base href="/"/>
+</head>
+<body ng-app="Core" ng-controller="coreCtrl">
+<div id="site-wrapper">
+	<div id="site-header">
+		<nav class="navbar navbar-default">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" ng-click="navCollapsed = !navCollapsed">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="/" ng-click="navCollapsed = true"><%= appName %></a>
+				</div>
+
+				<div class="collapse navbar-collapse" ng-class="{'isCollapsed': !navCollapsed}" id="navCollapse">
+					<ul class="nav navbar-nav" ng-click="navCollapsed = true">
+						<li><a href="">Nav</a></li>
+					</ul>
+					<ul ng-cloak class="nav navbar-nav pull-right">
+						<li><a href="">Right Nav</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</div>
+	<div id="site-body" ui-view="content">
+
+	</div>
+	<div id="site-footer">
+		<div class="container">
+			<div class="row-fluid">
+				<p>&copy; 2015 <%= appName %></p>
+			</div>
+			<div class="row-fluid">
+				<a href="" >Link</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- inject:html -->
+<!-- endinject -->
+
+<!-- inject:js -->
+<!-- endinject -->
+</body>
+</html>

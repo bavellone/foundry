@@ -25,6 +25,7 @@ describe('foundry setup', function () {
 			it('copies server scripts', function () {
 				expect('server/app.js').to.be.a.file;
 				expect('server/api.js').to.be.a.file;
+				expect('server/api/module/api.js').to.be.a.file;
 			});
 		});
 	});

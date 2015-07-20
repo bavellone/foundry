@@ -82,6 +82,6 @@ global.config = config;
 global.debug = debug;
 global.request = require('supertest');
 
-_.map(glob.sync('./server/app/**/model.js'), function (modelPath) {
+_.map(glob.sync('./server/api/**/model.js'), function (modelPath) {
 	require(path.resolve(modelPath));
 });

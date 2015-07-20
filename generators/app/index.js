@@ -49,12 +49,15 @@ Generator.prototype.meta = function() {
 	var yo = this;
 	_.map([
 		{src: 'meta/_gulpfile.js', dest: 'gulpfile.js'},
-		{src: 'meta/_package.json', dest: 'package.json'}
+		{src: 'meta/_package.json', dest: 'package.json'},
+		{src: 'meta/_Dockerfile', dest: 'Dockerfile'},
+		{src: 'meta/_readme.md', dest: 'readme.md'}
 	], function(tmpl) {
 		yo.template(tmpl.src, tmpl.dest, yo);
 	});
 
 	this.copy('meta/_.gitignore', '.gitignore');
+	this.copy('meta/_.dockerignore', '.dockerignore');
 	this.copy('meta/_bower.json', 'bower.json');
 };
 
@@ -64,7 +67,8 @@ Generator.prototype.server = function () {
 	this.mkdir('server/config/env');
 	this.mkdir('server/libs');
 	this.mkdir('server/libs/mail');
-	this.mkdir('server/app');
+	this.mkdir('server/api');
+	this.mkdir('server/api/module');
 
 	var yo = this;
 	_.map([
@@ -88,6 +92,7 @@ Generator.prototype.server = function () {
 
 	this.copy('server/_app.js', 'server/app.js');
 	this.copy('server/_api.js', 'server/api.js');
+	this.copy('server/_api.module.js', 'server/api/module/api.js');
 };
 
 Generator.prototype.public = function () {

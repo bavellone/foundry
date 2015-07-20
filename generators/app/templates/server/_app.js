@@ -12,7 +12,7 @@ var path = require('path'),
 	utils = require('./libs/utils');
 
 // Import models
-utils.globMap('./server/app/**/model.js', function(paths) {
+utils.globMap('./server/api/**/model.js', function(paths) {
 	require(paths.full);
 });
 

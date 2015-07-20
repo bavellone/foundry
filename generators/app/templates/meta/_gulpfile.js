@@ -11,7 +11,8 @@ var gulp = require('gulp'),
 	spawn = require('child_process').spawn,
 	argv = require('yargs').argv,
 	pack = require('./package'),
-	run = require('run-sequence');
+	run = require('run-sequence'),
+	q = require('q');
 
 
 var ENV = 1,
@@ -192,9 +193,9 @@ gulp.task('bump', function() {
 		return;
 	}
 
-	if (plugins.util.env.minor)
+	if (argv.minor)
 		bumpType = 'minor';
-	else if (plugins.util.env.major)
+	else if (argv.major)
 		bumpType = 'major';
 
 	pack.version = semver.inc(pack.version, bumpType);
@@ -205,24 +206,42 @@ gulp.task('bump', function() {
 });
 
 gulp.task('deploy', function(cb) {
-	spawn('git', ['pull'], {
-		stdio: 'inherit'
-	})
-		.on('error', function(err) {
-			console.log(err);
-		})
-		.on('exit', function() {
-			console.log(chalk.green('Deploying version', pack.version));
-			spawn(scripts.deploy, [pack.version], {
+
+	var tasks = [
+		{
+			cmd: 'git',
+			args: ['pull']
+		}, {
+			cmd: 'npm',
+			args: ['i']
+		}, {
+			cmd: 'bower',
+			args: ['i']
+		}
+	];
+
+	function spawnCmd(task) {
+		return q.promise(function(resolve, reject) {
+			spawn(task.cmd, task.args, {
 				stdio: 'inherit'
 			})
 				.on('error', function(err) {
 					console.log(err);
+					reject(err);
 				})
-				.on('exit', function() {
-					console.log(chalk.green('Deployment successful!'));
-					cb();
-				})
+				.on('exit', resolve);
+		})
+	}
+
+	spawnCmd(tasks[0]).then(function() {
+		return spawnCmd(tasks[1])
+	})
+		.then(function() {
+			console.log(chalk.green('Deployment successful!'));
+			cb();
+		}, function() {
+			console.log(chalk.red('Deployment unsuccessful!'));
+			cb();
 		});
 });
 

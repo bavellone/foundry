@@ -15,24 +15,79 @@ $bp-sm: 768px;
 $bp-xs: 640px;
 
 @mixin bp($point) {
-  @if $point == desktop {
-    @media (min-width: $bp-lg) { @content ; }
-  }
-  @else if $point == laptop {
-    @media (min-width: $bp-md) { @content ; }
-  }
-  @else if $point == tablet {
-    @media (min-width: $bp-sm) { @content ; }
-  }
-  @else if $point == phablet {
-    @media (min-width: $bp-xs)  { @content ; }
-  }
-  @else if $point == mobileonly {
-    @media (max-width: $bp-xs)  { @content ; }
-  }
-  @else {
-    @media (min-width: $point) { @content ; }
-  }
+  @if $point == desktop { @media (min-width: $bp-lg) { @content ; } }
+  @else if $point == laptop { @media (min-width: $bp-md) { @content ; } }
+  @else if $point == tablet { @media (min-width: $bp-sm) { @content ; } }
+  @else if $point == phablet { @media (min-width: $bp-xs)  { @content ; } }
+  @else if $point == mobileonly { @media (max-width: $bp-xs)  { @content ; } }
+  @else { @media (min-width: $point) { @content ; } }
+}
+
+@mixin transition($transition...) {
+	-moz-transition: $transition;
+	-o-transition: $transition;
+	-webkit-transition: $transition;
+	transition: $transition;
+}
+
+@mixin transition-property($property...) {
+	-moz-transition-property: $property;
+	-o-transition-property: $property;
+	-webkit-transition-property: $property;
+	transition-property: $property;
+}
+
+@mixin transition-duration($duration...) {
+	-moz-transition-property: $duration;
+	-o-transition-property: $duration;
+	-webkit-transition-property: $duration;
+	transition-property: $duration;
+}
+
+@mixin transition-timing-function($timing...) {
+	-moz-transition-timing-function: $timing;
+	-o-transition-timing-function: $timing;
+	-webkit-transition-timing-function: $timing;
+	transition-timing-function: $timing;
+}
+
+@mixin transition-delay($delay...) {
+	-moz-transition-delay: $delay;
+	-o-transition-delay: $delay;
+	-webkit-transition-delay: $delay;
+	transition-delay: $delay;
+}
+
+@mixin keyframes($animation-name) {
+	@-webkit-keyframes $animation-name { @content; }
+	@-moz-keyframes $animation-name {	@content;	}
+	@-ms-keyframes $animation-name { @content; }
+	@-o-keyframes $animation-name {	@content;	}
+	@keyframes $animation-name { @content; }
+}
+
+@mixin animation($str) {
+	-webkit-animation: #{$str};
+	-moz-animation: #{$str};
+	-ms-animation: #{$str};
+	-o-animation: #{$str};
+	animation: #{$str};
+}
+
+// Examples
+@include keyframes(slide-down) {
+	0% {
+		opacity: 1;
+	}
+	90% {
+		opacity: 0;
+	}
+}
+.example {
+	width: 100px;
+	height: 100px;
+	background: black;
+	@include animation('slide-down 5s 3');
 }
 
 /// Computes a top-shadow for a card effect.

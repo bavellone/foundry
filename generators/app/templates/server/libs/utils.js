@@ -1,5 +1,5 @@
 
-var config = require('../config/config'),
+var config = require('../config'),
 	_ = require('lodash'),
 	glob = require('glob'),
 	path = require('path');

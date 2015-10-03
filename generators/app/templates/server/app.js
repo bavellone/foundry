@@ -1,6 +1,6 @@
 var path = require('path'),
 	_ = require('lodash'),
-	config = require('./config/config'),
+	config = require('./config'),
 	chalk = require('chalk'),
 	mongoose = require('mongoose'),
 	express = require('express'),
@@ -41,7 +41,7 @@ module.exports = function() {
 	require('./api.js')(app);
 
 	app.all('/*', function(req, res) {
-		res.sendFile(path.resolve('./public/assets/index.html'));
+		res.sendFile(path.resolve('./public/index.html'));
 	});
 
 	// Error handling

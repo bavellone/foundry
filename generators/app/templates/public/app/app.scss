@@ -1,0 +1,80 @@
+@import "includes";
+
+$primary-color: #3e7cba;
+$secondary-color: #2c5783;
+$bg-color: #f2f2f2;
+
+$gray-bbb: #222;
+$gray-bb: #444;
+$gray-b: #666;
+$gray: #888;
+$gray-w: #aaa;
+$gray-ww: #ccc;
+$gray-www: #eee;
+
+$bp-lg: 1200px;
+$bp-md: 992px;
+$bp-sm: 768px;
+$bp-xs: 640px;
+
+/* Animation Example
+@include keyframes(slide-down) {
+	0% {
+		opacity: 1;
+	}
+	90% {
+		opacity: 0;
+	}
+}
+
+.example {
+	width: 100px;
+	height: 100px;
+	background: black;
+	@include animation('slide-down 5s 3');
+}
+*/
+
+html, body {
+	height: auto;
+	background-color: $bg-color;
+}
+
+body {
+	position: relative;
+}
+
+.overflow-ellipsis {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.ui.container.nav-container {
+	margin: 1rem 0 2rem;
+
+	.header.item {
+		font-weight: 700;
+	}
+}
+
+.site.masthead {
+	h1.header {
+		margin-top: 2rem;
+		margin-bottom: 1rem;
+		font-size:3rem;
+		text-align: left;
+	}
+	.ui.menu .ui.button {
+		margin-left: 0.5em;
+	}
+}
+
+.container.home {
+	h1 {
+		margin: 2rem 0 1rem;
+	}
+	
+}
+
+@import "overrides";

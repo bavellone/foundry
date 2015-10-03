@@ -2,7 +2,7 @@ var _ = require('lodash'),
 	mandrill = require('mandrill-api/mandrill'),
 	utils = require('./utils'),
 	errors = require('./errors'),
-	config = require('../config/config');
+	config = require('../config');
 
 var mailClient = new mandrill.Mandrill(config.mail.apiKey);
 

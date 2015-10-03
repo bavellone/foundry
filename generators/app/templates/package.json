@@ -1,0 +1,131 @@
+{
+  "name": "<%= appName %>",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+	"async": "^0.9.2",
+	"bcrypt": "^0.8.5",
+	"body-parser": "^1.14.1",
+	"chai": "^2.3.0",
+	"chalk": "^0.5.1",
+	"debug": "^2.2.0",
+	"express": "^4.13.3",
+	"glob": "^4.5.3",
+	"lodash": "^3.10.1",
+	"mandrill-api": "^1.0.45",
+	"moment": "^2.10.6",
+	"mongoose": "^4.1.9",
+	"q": "^1.4.1",
+	"semantic-ui": "^2.1.3",
+	"yargs": "^3.26.0"
+  },
+  "devDependencies": {
+	"babelify": "^6.3.0",
+	"bower-resolve": "^2.2.1",
+	"browserify": "^11.0.1",
+	"chai": "^2.0.0",
+	"eslint": "^1.1.0",
+	"eslint-plugin-react": "^3.3.1",
+	"eslint-plugin-lodash": "^0.1.3",
+	"event-stream": "^3.3.1",
+	"gulp": "^3.9.0",
+	"gulp-bytediff": "^0.2.1",
+	"gulp-concat": "^2.5.0",
+	"gulp-filesize": "^0.0.6",
+	"gulp-if": "^1.2.5",
+	"gulp-inject": "^1.1.1",
+	"gulp-load-plugins": "^0.9.0",
+	"gulp-minify-css": "^0.4.5",
+	"gulp-mocha": "^2.0.1",
+	"gulp-nodemon": "^2.0.2",
+	"gulp-notify": "^2.2.0",
+	"gulp-sass": "^2.0.4",
+	"gulp-tap": "^0.1.3",
+	"gulp-uglify": "^1.1.0",
+	"mocha-unfunk-reporter": "^0.4.0",
+	"node-notifier": "^4.1.1",
+	"run-sequence": "^1.1.4",
+	"semver": "^4.3.6",
+	"supertest": "^0.15.0",
+	"vinyl-buffer": "^1.0.0",
+	"vinyl-source-stream": "^1.1.0",
+	"watchify": "^3.4.0",
+	"yargs": "^3.14.0"
+  },
+  "scripts": {
+	"start": "node server.js",
+	"dev": "gulp watch",
+	"build": "gulp build",
+	"watch": "gulp watch",
+	"watch:debug": "set DEBUG=app:*,lib:*&&gulp watch",
+	"test": "gulp test",
+	"test:watch": "gulp watch:test",
+	"test:debug": "set DEBUG=app:*,lib:*&&gulp test",
+	"test:debugAll": "set DEBUG=*:*&&gulp test"
+  },
+  "paths": {
+	"src": {
+	  "app": {
+		"js": [
+		  "public/app/**/*.js",
+		  "public/app/**/*.jsx"
+		],
+		"scss": [
+		  "public/app/**/*.scss"
+		],
+		"test": [
+		  "test/globals.js",
+		  "test/utils.js",
+		  "server/test/**/*.js",
+		  "server/**/test.js"
+		]
+	  },
+	  "vendor": {
+		"deps": [
+		  "react",
+		  "react-router",
+		  "rxjs",
+		  "lodash"
+		],
+		"js": [
+		  "bower_components/jquery/dist/jquery.js",
+		  "public/semantic/dist/semantic.js",
+		  "bower_components/react/react.js",
+		  "bower_components/react-router/build/umd/ReactRouter.js"
+		],
+		"css": [
+		  "bower_components/fontawesome/css/font-awesome.css",
+		  "public/semantic/dist/semantic.css"
+		],
+		"fonts": [
+		  "bower_components/bootstrap/dist/fonts/*",
+		  "bower_components/fontawesome/fonts/*"
+		]
+	  }
+	},
+	"dist": {
+	  "app": {
+		"js": {
+		  "file": "app.bundle.js",
+		  "dir": "public/assets/js",
+		  "entryPoint": "public/app/index.jsx"
+		},
+		"css": {
+		  "file": "app.bundle.css",
+		  "dir": "public/assets/css"
+		}
+	  },
+	  "vendor": {
+		"js": {
+		  "file": "vendor.bundle.js",
+		  "dir": "public/assets/js"
+		},
+		"css": {
+		  "file": "vendor.bundle.css",
+		  "dir": "public/assets/css"
+		},
+		"fonts": "public/assets/fonts"
+	  }
+	}
+  }
+}

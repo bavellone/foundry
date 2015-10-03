@@ -1,3 +1,4 @@
+/*eslint-env node*/
 var express = require('express'),
 	errors = require('../../libs/errors'),
 	_ = require('lodash');

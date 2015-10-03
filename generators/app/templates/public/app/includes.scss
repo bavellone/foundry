@@ -1,26 +1,54 @@
-$primary-color: #3e7cba;
-$secondary-color: #2c5783;
 
-$gray-bbb: #222;
-$gray-bb: #444;
-$gray-b: #666;
-$gray: #888;
-$gray-w: #aaa;
-$gray-ww: #ccc;
-$gray-www: #eee;
+@mixin bp-min($point) {
+	@if $point == desktop {
+		@media (min-width: $bp-lg) {
+			@content;
+		}
+	} @else if $point == laptop {
+		@media (min-width: $bp-md) {
+			@content;
+		}
+	} @else if $point == tablet {
+		@media (min-width: $bp-sm) {
+			@content;
+		}
+	} @else if $point == phablet {
+		@media (min-width: $bp-xs) {
+			@content;
+		}
+	} @else {
+		@media (min-width: $point) {
+			@content;
+		}
+	}
+}
 
-$bp-lg: 1200px;
-$bp-md: 992px;
-$bp-sm: 768px;
-$bp-xs: 640px;
-
-@mixin bp($point) {
-  @if $point == desktop { @media (min-width: $bp-lg) { @content ; } }
-  @else if $point == laptop { @media (min-width: $bp-md) { @content ; } }
-  @else if $point == tablet { @media (min-width: $bp-sm) { @content ; } }
-  @else if $point == phablet { @media (min-width: $bp-xs)  { @content ; } }
-  @else if $point == mobileonly { @media (max-width: $bp-xs)  { @content ; } }
-  @else { @media (min-width: $point) { @content ; } }
+@mixin bp-max($point) {
+	@if $point == desktop {
+		@media (max-width: $bp-lg) {
+			@content;
+		}
+	} @else if $point == laptop {
+		@media (max-width: $bp-md) {
+			@content;
+		}
+	} @else if $point == tablet {
+		@media (max-width: $bp-sm) {
+			@content;
+		}
+	} @else if $point == phablet {
+		@media (max-width: $bp-xs) {
+			@content;
+		}
+	} @else if $point == phone {
+		@media (max-width: $bp-xs) {
+			@content;
+		}
+	} @else {
+		@media (max-width: $point) {
+			@content;
+		}
+	}
 }
 
 @mixin transition($transition...) {
@@ -59,35 +87,18 @@ $bp-xs: 640px;
 }
 
 @mixin keyframes($animation-name) {
-	@-webkit-keyframes $animation-name { @content; }
-	@-moz-keyframes $animation-name {	@content;	}
-	@-ms-keyframes $animation-name { @content; }
-	@-o-keyframes $animation-name {	@content;	}
-	@keyframes $animation-name { @content; }
+	@-webkit-keyframes #{$animation-name} { @content; }
+	@-moz-keyframes #{$animation-name} {	@content;	}
+	@-ms-keyframes #{$animation-name} { @content; }
+	@-o-keyframes #{$animation-name} {	@content;	}
+	@keyframes #{$animation-name} { @content; }
 }
 
 @mixin animation($str) {
 	-webkit-animation: #{$str};
 	-moz-animation: #{$str};
-	-ms-animation: #{$str};
 	-o-animation: #{$str};
 	animation: #{$str};
-}
-
-// Examples
-@include keyframes(slide-down) {
-	0% {
-		opacity: 1;
-	}
-	90% {
-		opacity: 0;
-	}
-}
-.example {
-	width: 100px;
-	height: 100px;
-	background: black;
-	@include animation('slide-down 5s 3');
 }
 
 /// Computes a top-shadow for a card effect.
@@ -125,52 +136,4 @@ $bp-xs: 640px;
 	} @else {
 		box-shadow: bottom-shadow($depth), top-shadow($depth);
 	}
-}
-
-html, body {
-	height: 100%;
-}
-
-body {
-	position: relative;
-	background-color: #f6f6f6;
-}
-
-#site-wrapper {
-	min-height: 100%;
-	position: relative;
-}
-
-#site-header {
-
-}
-
-#site-body {
-	padding-bottom: 80px;
-}
-
-#site-footer {
-	background-color: $gray-www;
-	padding: 10px 0;
-	color: $gray;
-	text-align: center;
-	position: absolute;
-	bottom: 0;
-	width: 100%;
-	border-top: 1px solid #ddd;
-
-	p {
-		margin: 0;
-	}
-}
-
-.list-unstyled {
-	padding: 0;
-	list-style: none;
-}
-
-.overflow-ellipsis {
-	text-overflow: ellipsis;
-	overflow: hidden;
-	white-space: nowrap;
 }

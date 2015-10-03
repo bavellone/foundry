@@ -1,5 +1,5 @@
 var chalk = require('chalk'),
-	config = require('./server/config/config'),
+	config = require('./server/config'),
 	debug = require('debug')('app:server');
 
 var app = module.exports = require('./server/app.js')();

@@ -1,4 +1,4 @@
-var config = require('./config/config'),
+var config = require('./config'),
 	_ = require('lodash'),
 	path = require('path'),
 	debug = require('debug')('app:api'),

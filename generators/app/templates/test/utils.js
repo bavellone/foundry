@@ -3,9 +3,9 @@ var mongoose = require('mongoose'),
 	async = require('async'),
 	debug = require('debug')('app:testing');
 
-delete require.cache[require.resolve('../server/config/config.js')];
+delete require.cache[require.resolve('../server/config.js')];
 
-var config = require('../server/config/config');
+var config = require('../server/config');
 
 module.exports.establishDBConn = function establishDBConn(cb) {
 	return function (done) {

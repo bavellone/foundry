@@ -1,4 +1,4 @@
-var config = require('../../config/config');
+var config = require('../../config');
 
 module.exports = function (Message) {
 
@@ -6,9 +6,9 @@ module.exports = function (Message) {
 		ops = ops || {};
 		_.defaults(ops, {
 			to: config.mail.debug.email,
-			subject: 'Debug - LSR',
-			from_email: 'debug@bavellone.me',
-			from_name: 'Debug'
+			subject: 'Debug - <%= appName %>',
+			from_email: '<%= appNS %>@bavellone.me',
+			from_name: '<%= appName %>'
 		});
 
 		return new Message(ops);

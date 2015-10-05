@@ -12,14 +12,16 @@ var routes = utils.globMap('./server/api/**/api.js', function(paths) {
 	};
 });
 
-var basePath = config.api.path + '/' + config.api.version;
+var basePath = config.api.path + '/' + config.api.version + '/';
 
 module.exports = function(app) {
+	app.locals.api = {};
 	if (config.enable.api) {
 		debug('Initializing API...');
 		app.locals.apiPath = basePath;
-		_.each(routes, function(route) {
-			route.app(app, basePath + '/' + route.name);
+		_.each(routes, function (route) {
+			app.use(basePath + route.name, route.app());
+			app.locals.api[route.name] = basePath + route.name;
 		});
 		debug('API initialized!');
 	}

@@ -1,4 +1,6 @@
 /*eslint-env node */
+require('babel/register')();
+
 var gulp = require('gulp'),
 	nodemon = require('gulp-nodemon'),
 	run = require('run-sequence'),
@@ -7,7 +9,7 @@ var gulp = require('gulp'),
 require('./build/main');
 
 gulp.task('watch:test', function () {
-	gulp.watch(['server/**/*.js'], ['test']);
+	gulp.watch(['server/**/*.js', 'server/**/*.jsx'], ['test']);
 });
 
 gulp.task('watch:app', function () {

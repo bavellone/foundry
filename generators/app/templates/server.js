@@ -1,3 +1,6 @@
+/*eslint-env node*/
+require('babel/register')();
+
 var chalk = require('chalk'),
 	config = require('./server/config'),
 	debug = require('debug')('app:server');

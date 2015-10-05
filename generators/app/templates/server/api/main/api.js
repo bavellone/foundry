@@ -3,13 +3,13 @@ var express = require('express'),
 	errors = require('../../libs/errors'),
 	_ = require('lodash');
 
-module.exports = function API(app, path) {
+module.exports = function API() {
 	// Create the API router
 	var API = express.Router();
-
-	// Attach router to main application
-	app.use(path, API);
+	
+	// Attach routes
+	// ...
 
 	// Return the main app
-	return app;
+	return API;
 };

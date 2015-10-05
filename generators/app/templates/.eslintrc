@@ -24,7 +24,12 @@
   },
   "globals": {
     "_": true,
-    "document": true
+    "document": true,
+    "describe": true,
+    "it": true,
+    "before": true,
+    "after": true,
+    "expect": true
   },
   "rules": {
     "quotes": [0, "single"],
@@ -52,7 +57,7 @@
     "react/no-multi-comp": 1,
     "react/no-set-state": 1,
     "react/no-unknown-property": 1,
-    "react/prop-types": 1,
+    "react/prop-types": 0,
     "react/react-in-jsx-scope": 1,
     "react/require-extension": 1,
     "react/self-closing-comp": 1,

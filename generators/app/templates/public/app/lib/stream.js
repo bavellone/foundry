@@ -1,5 +1,5 @@
 /*eslint-env browser */
-import Rx from 'rxjs';
+import Rx from 'rx';
 
 /**
  * The RxStream manages the connections of a new Observer/Observable pair.
@@ -8,34 +8,26 @@ import Rx from 'rxjs';
  */
 export class RxStream {
 	constructor() {
-		this.active = false;
-		this.stdout = Rx.Observable.create(observer => {
-			this.stdin = observer;
-			this.active = true;
-		}).publish();
-		this.stdout.connect();
+		this.stream = new Rx.Subject();
 	}
 	emit(msg) {
-		this.stdin.onNext(msg);
+		this.stream.onNext(msg);
 		return this;
 	}
 	emitMsg(...args) {
 		this.emit(new Msg(...args));
 		return this;
 	}
-	listen(type, fn) {
-		return this.stdout.subscribe(msg => {
-			if (msg.type == type)
-				fn(msg)
-		});
+	listen(type) {
+		return this.stream
+			.filter((msg) => msg.type == type)
+			.pluck('data');
 	}
-	listenAll(fn) {
-		return this.stdout.subscribe(msg => {
-			fn(msg);
-		});
+	listenAll() {
+		return this.stream;
 	}
 	close() {
-		this.stdin.onComplete();
+		this.stream.onCompleted();
 		return this;
 	}
 }

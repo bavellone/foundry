@@ -2,6 +2,7 @@
 var notify = require('node-notifier').notify,
 	_ = require('lodash'),
 	config = require('../server/config'),
+	chalk = require('chalk'),
 	spawn = require('child_process').spawn,
 	q = require('q');
 
@@ -15,16 +16,19 @@ Utils.notify = function (msg) {
 	});
 };
 
-Utils.onEnd = function (msg) {
+Utils.onEnd = function (msg, color) {
 	return function () {
-		console.log(msg);
+		if (!color)
+			console.log(msg);
+		else
+			console.log(chalk[color](msg));
 		notify(msg);
 	}
 };
 
-Utils.onErr = function () {
-	return function (err) {
-		console.log('Got err', err.toString());
+Utils.onErr = function (err) {
+	if (err) {
+		console.log(chalk.red(err.toString()));
 		if (this.emit)
 			this.emit('end');
 	}

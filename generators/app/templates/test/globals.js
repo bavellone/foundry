@@ -2,10 +2,8 @@
 var chai = require('chai'),
 	_ = require('lodash'),
 	async = require('async'),
-	debug = require('debug');
-
-delete require.cache[require.resolve('../server/config.js')];
-var config = require('../server/config');
+	debug = require('debug'),
+	config = require('../server/config');
 
 global.chai = chai;
 global.expect = chai.expect;

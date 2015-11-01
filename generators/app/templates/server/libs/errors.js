@@ -1,66 +1,17 @@
+/*eslint-env node*/
 'use strict';
 
 var _ = require('lodash'),
-	util = require('util'),
-	debug = require('debug')('app:lib:error');
-
-/**
- * Get unique error field name
- */
-function getUniqueErrorField(err) {
-	var output;
-
-	try {
-		output = err.err.substring(err.err.lastIndexOf('.$') + 2, err.err.lastIndexOf('_1'));
-
-	} catch (ex) {
-		output = 'Field';
-	}
-
-	return output;
-}
-
-/**
- * Get the error message from error object
- */
-module.exports.getModelError = function(err) {
-	if (err.code) {
-		if (err.code == 11001 || err.code == 11000) {
-			return exports.errors.modelDup(getUniqueErrorField(err));
-		}
-	}
-	else
-		return new BaseError(400, 'Unknown Error', err.errors);
-};
-
-/**
- * Get the error message from error object
- */
-module.exports.getValidationError = function(err) {
-	return _.map(err.errors, function(error) {
-		return {
-			field: error.path,
-			type: error.type
-		};
-	})
-};
+		util = require('util'),
+		debug = require('debug')('app:lib:error');
 
 /**
  * Converts an error into an application error
  * @param err
  */
-var wrap = function(err) {
-	if (err.name == 'ValidationError') {
-
-		if (err.errors) {
-			var e = _.values(err.errors);
-			return module.exports.errors.validationError(e[0].path, e[0].type);
-		}
-		return module.exports.errors.validationError(err.path, err.type);
-	}
-	else if (err.name == 'MongoError') {
-		return module.exports.getModelError(err);
-	}
+var wrap = function (err) {
+	if (err.code == 'Neo.ClientError.Schema.ConstraintViolation')
+		return new Neo4jDuplicate(err.message);
 	else {
 		console.error('UNKNOWN ERROR');
 		console.error(err);
@@ -69,8 +20,10 @@ var wrap = function(err) {
 	}
 };
 
-module.exports.saveCB = function(next, cb) {
-	return function(err, data) {
+module.exports.wrap = wrap;
+
+module.exports.saveCB = function (next, cb) {
+	return function (err, data) {
 		if (err) {
 			debug('Save Error!');
 			return next(wrap(err));
@@ -85,7 +38,7 @@ function BaseError(code, name, desc) {
 
 	var self = this;
 	if (_.isObject(code)) {
-		_.map(code, function(val, key) {
+		_.map(code, function (val, key) {
 			self[key] = val;
 		});
 	}
@@ -107,41 +60,26 @@ BaseError.prototype.name = 'BaseError';
 module.exports.BaseError = BaseError;
 
 module.exports.errors = {
-	error: function(code, name, desc) {
+	error: function (code, name, desc) {
 		return new BaseError(code, name, desc)
 	},
-	400: function(name, desc) { // Bad Request
+	400: function (name, desc) { // Bad Request
 		return this.error(400, name, desc)
 	},
-	401: function(name, desc) { // Unauthorized
+	401: function (name, desc) { // Unauthorized
 		return this.error(401, name, desc)
 	},
-	permissionDenied: function(desc) {
+	permissionDenied: function (desc) {
 		return this[401]('Permission denied', desc)
 	},
-	authDenied: function(desc) {
+	authDenied: function (desc) {
 		return this[401]('Authentication Denied', desc)
 	},
-	reqAdmin: function() {
+	reqAdmin: function () {
 		return this.permissionDenied('Requires Admin Privileges')
 	},
-	reqUser: function() {
+	reqUser: function () {
 		return this.permissionDenied('Must be logged in')
-	},
-	reqTech: function() {
-		return this.permissionDenied('Must be a Technician')
-	},
-	signupDisabled: function() {
-		return this[401]('Signup disabled', 'Signup has been disabled!')
-	},
-	authFailed: function() {
-		return this[401]('Authentication failed', 'Invalid Email/Password!')
-	},
-	modelDup: function(field) {
-		return this[400]('Model Duplicate', field + ' already exists!')
-	},
-	validationError: function(path, type) {
-		return this[400]('Invalid/Missing Data', path + ' is ' + type + '!')
 	}
 };
 
@@ -161,9 +99,29 @@ module.exports.catchAll = function catchAll(err, req, res, next) {
 
 	var whitelist = ['code', 'name', 'desc', 'data'];
 
-	res.json(_.reduce(err, function(response, val, key) {
+	res.json(_.reduce(err, function (response, val, key) {
 		if (val && _.includes(whitelist, key))
 			response[key] = val;
 		return response;
 	}, {}))
 };
+
+
+let Neo4jError = function (msg) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.message = msg;
+};
+
+util.inherits(Neo4jError, BaseError);
+
+let Neo4jDuplicate = function (msg) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.message = msg;
+};
+
+util.inherits(Neo4jDuplicate, BaseError);
+
+module.exports.Neo4jError = Neo4jError;
+module.exports.Neo4jDuplicate = Neo4jDuplicate;

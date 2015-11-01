@@ -1,0 +1,18 @@
+@import "includes";
+
+.container.home {
+	h1 {
+		margin: 2rem 0 1rem;
+	}
+}
+
+.hrbr-container {
+	.content div {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+}
+
+.home .ui.grid {
+	margin-top: 20px;
+}

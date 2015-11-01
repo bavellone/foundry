@@ -1,6 +1,7 @@
 /*eslint-env node*/
 var mongoose = require('mongoose'),
-	debug = require('debug')('app:testing');
+	debug = require('debug')('app:testing'),
+	config = require('../server/config');
 
 
 module.exports.establishDBConn = function establishDBConn(cb) {

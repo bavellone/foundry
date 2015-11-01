@@ -1,0 +1,19 @@
+@import 'includes';
+
+.fade-enter, .fade-appear {
+	opacity: 0;
+}
+
+.fade-enter.fade-enter-active, .fade-appear.fade-appear-active {
+	opacity: 1;
+	@include transition(opacity .4s ease-in)
+}
+
+.fade-leave {
+	opacity: 1;
+}
+
+.fade-leave.fade-out-leave-active {
+	opacity: 0;
+	@include transition(opacity .4s ease-in)
+}

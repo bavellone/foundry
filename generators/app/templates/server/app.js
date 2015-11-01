@@ -1,31 +1,18 @@
+/*eslint-env node*/
 var path = require('path'),
-	_ = require('lodash'),
-	config = require('./config'),
-	chalk = require('chalk'),
-	mongoose = require('mongoose'),
-	express = require('express'),
-	bodyParser = require('body-parser'),
-	http = require('http'),
-	debug = require('debug')('app:init'),
-	debugMongo = require('debug')('app:mongo'),
-	errors = require('./libs/errors'),
-	utils = require('./libs/utils');
+		config = require('./config'),
+		express = require('express'),
+		bodyParser = require('body-parser'),
+		http = require('http'),
+		debug = require('debug')('app:init'),
+		errors = require('./libs/errors');
 
-// Import models
-utils.globMap('./server/api/**/model.js', function(paths) {
-	require(paths.full);
-});
+import db from './db';
 
-module.exports = function() {
+module.exports = function () {
 	var app = express();
-	app.db = mongoose.connect(config.db, function(err) {
-		if (err) {
-			debugMongo(chalk.red('Could not connect to MongoDB!'));
-			debugMongo(chalk.red(err));
-		}
-		else
-			debugMongo('Connected to MongoDB: ' + chalk.green(config.db));
-	});
+	app.disable('x-powered-by');
+	app.db = new db(config.db);
 
 	http.globalAgent.maxSockets = config.connectionPool;
 
@@ -40,7 +27,11 @@ module.exports = function() {
 	// Initialize API
 	require('./api.js')(app);
 
-	app.all('/*', function(req, res) {
+	app.use('/fonts.gstatic*', (req, res) => {
+		res.sendStatus(404);
+	});
+
+	app.all('/*', function (req, res) {
 		res.sendFile(path.resolve('./public/index.html'));
 	});
 

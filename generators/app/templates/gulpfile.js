@@ -13,20 +13,18 @@ gulp.task('watch:test', function () {
 });
 
 gulp.task('watch:app', function () {
-	run('watchAppJS');
-	gulp.watch([pack.paths.src.app.scss], ['appSCSS'])
+    gulp.watch([pack.paths.src.app.scss], ['appSCSS']);
+    gulp.run('watchAppJS');
 });
 
 gulp.task('watch:files', ['watch:app', 'watch:test']);
 
 gulp.task('watch:server', function () {
-	nodemon({
-		script: pack.main,
-		watch: ['server', 'server.js'],
-		env: {
-			'NODE_ENV': 'development'
-		}
-	})
+    nodemon({
+        script: pack.main,
+        watch: ['server', 'server.js'],
+        env: process.env
+    })
 });
 
 gulp.task('watch', ['watch:server', 'watch:files']);

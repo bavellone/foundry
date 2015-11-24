@@ -2,12 +2,15 @@
 /**
  * This module defines a set of common CRUD routes that operate on Mongoose models
  */
+	
+import errorHandler from './errors';
+import _ from 'lodash';
+import express from 'express';
+import _debug from 'debug';
+import mongoose from 'mongoose';
 
-var errorHandler = require('./errors'),
-	_ = require('lodash'),
-	express = require('express'),
-	debug = require('debug')('lib:crud'),
-	mongoose = require('mongoose');
+let debug = _debug('app:lib'),
+	methods = ['list', 'read', 'create', 'update', 'destroy', 'emptyDB'];
 
 /**
  * Export a function to attach CRUD endpoints to the given model.
@@ -17,64 +20,42 @@ var errorHandler = require('./errors'),
  * @param hooks
  * @returns {*}
  */
-module.exports = function (model, middleware, hooks) {
+export default function (model, middleware, hooks) {
 	if (arguments.length == 2)
 		hooks = middleware;
 
-	// Build the API object
-	var api = buildAPI(model, hooks);
-
 	// Create the micro-app
-	var app = express.Router();
+	let app = express.Router();
 
+	// Attach middleware
 	if (_.isArray(middleware))
-		_.map(middleware, function (fn) {
-			app.use(fn);
-		});
+		_.map(middleware, fn => app.use(fn));
 	else if (_.isFunction(middleware))
 		app.use(middleware);
 
 	// Attach the CRUD interface
-	return crudAPI(app, api);
+	return CRUD(app, model, buildHookMap(hooks));
 };
 
 /**
  *  Returns an object with a REST-ful API attached
  *
+ * @param app
  * @param model
  * @param hooks
  * @returns {{list: Function, read: Function, create: Function, update: Function, destroy: Function}}
  */
-function buildAPI(model, hooks) {
-	var hookMap = buildHookMap(hooks);
-
-	return {
-		list: list(model, hookMap.list),
-		read: read(model, hookMap.read),
-		create: create(model, hookMap.create),
-		update: update(model, hookMap.update),
-		destroy: destroy(model, hookMap.destroy),
-		emptyDB: emptyDB(model, hookMap.emptyDB)
-	};
-}
-
-/**
- * Accepts an express-like app and an api object akin to the one returned by buildAPI()
- *
- * @param app
- * @param api
- */
-function crudAPI(app, api) {
+function CRUD(app, model, hooks) {
 	app.route('/')
-		.get(api.list)
-		.post(api.create)
-		.delete(api.emptyDB);
-
+		.get(list(model, hooks.list))
+		.post(create(model, hooks.create))
+		.delete(emptyDB(model, hooks.emptyDB));
+	
 	app.route('/:id')
-		.get(api.read)
-		.post(api.update)
-		.delete(api.destroy);
-
+		.get(read(model, hooks.read))
+		.post(update(model, hooks.update))
+		.delete(destroy(model, hooks.destroy));
+	
 	return app;
 }
 
@@ -85,7 +66,7 @@ function crudAPI(app, api) {
  * @returns {*}
  */
 function buildHookMap(hooks) {
-	return _.reduce(['list', 'read', 'create', 'update', 'destroy', 'emptyDB'], function (map, action) {
+	return _.reduce(_methods, (map, action) => {
 		if (hooks && _.isPlainObject(hooks[action])) {
 			map[action] = _.merge({
 				pre: [],
@@ -116,24 +97,27 @@ function buildHookMap(hooks) {
  * @param hook
  */
 function list(model, hook) {
+	
 	return function list(req, res, next) {
 		debug("Got list request", req.method, req.baseUrl + req.path);
-		hook.pre(req, res, function (err) {
+		hook.pre(req, res, function (err, ops) {
 			if (err)
 				return next(err);
 
-			model.find().exec(errorHandler.saveCB(next, function (docs) {
-				hook.post(docs, req, res, function (err) {
+			model.findAll(ops || {}, errorHandler.saveCB(next, (docs) => {
+				hook.post(docs, req, res, (err) => {
 					if (err)
 						return next(err);
 
-					res.json(_.map(docs, function (doc) {
+					res.json(_.map(docs, (doc) => {
 						return ModelToObj(doc);
 					}))
 				})
-			}))
+			}));
+			
 		})
 	}
+	
 }
 
 /**
@@ -145,13 +129,14 @@ function list(model, hook) {
  * @param hook
  */
 function read(model, hook) {
+	
 	return function read(req, res, next) {
 		debug("Got read request", req.method, req.baseUrl + req.path);
 		hook.pre(req, res, function (err) {
 			if (err)
 				return next(err);
 
-			model.findById(req.params.id, errorHandler.saveCB(next, function (doc) {
+			model.read(req.params.id, errorHandler.saveCB(next, function (doc) {
 				hook.post(doc, req, res, function (err) {
 					if (err)
 						return next(err);
@@ -159,8 +144,10 @@ function read(model, hook) {
 					res.json(ModelToObj(doc));
 				})
 			}))
+			
 		})
 	}
+	
 }
 
 /**
@@ -177,19 +164,14 @@ function create(model, hook) {
 			if (err)
 				return next(err);
 
-			// Create the new model with the POST data
-			var Model = new model(req.body);
+			// Save the new model
+			model.save(req.body, errorHandler.saveCB(next, function (doc) {
+				hook.post(doc, req, res, function (err) {
+					if (err)
+						return next(err);
 
-			// Validate the new model
-			Model.validate(errorHandler.saveCB(next, function () {
-				Model.save(errorHandler.saveCB(next, function () {
-					hook.post(Model, req, res, function (err) {
-						if (err)
-							return next(err);
-
-						res.json(ModelToObj(Model));
-					})
-				}))
+					res.json(ModelToObj(doc));
+				})
 			}))
 		})
 	}
@@ -209,24 +191,23 @@ function update(model, hook) {
 			if (err)
 				return next(err);
 
-			model.findById(req.params.id, errorHandler.saveCB(res, function (doc) {
+			model.read(req.params.id, errorHandler.saveCB(res, function (doc) {
 				// Update the model
 				_.merge(doc, req.body, function (a, b) {
-					if (_.isArray(a) && _.isArray(b))
+					if ((_.isArray(a) && _.isArray(b)) || (_.isPlainObject(a) && _.isPlainObject(b)))
 						return b;
 				});
 
 				// Validate and save the new model data
-				doc.validate(errorHandler.saveCB(next, function () {
-					doc.save(errorHandler.saveCB(next, function () {
-						hook.post(doc, req, res, function (err) {
-							if (err)
-								return next(err);
+				model.save(doc, errorHandler.saveCB(next, function () {
+					hook.post(doc, req, res, function (err) {
+						if (err)
+							return next(err);
 
-							res.json(ModelToObj(doc));
-						})
-					}))
+						res.json(ModelToObj(doc));
+					})
 				}))
+				
 			}))
 		})
 	}
@@ -298,8 +279,5 @@ function emptyDB(model, hook) {
  * @constructor
  */
 function ModelToObj(model) {
-	return model.toObject({
-		versionKey: false,
-		transform: (model.exportData ? model.exportData.bind(model) : _.identity)
-	})
+	return model;
 }

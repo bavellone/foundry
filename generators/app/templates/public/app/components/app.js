@@ -32,8 +32,10 @@ export default class App extends React.Component {
 				<header id="site-header">
 					<div className="ui inverted blue site aligned segment">
 						<div className="ui container">
-							<h1 className="ui inverted header"><i className="fa fa-fw fa-anchor" onClick={this.toggleNav.bind(this)}></i>
-								Harbor</h1>
+							<h1 className="ui inverted header">
+								<i className="fa fa-fw fa-bars" onClick={this.toggleNav.bind(this)}></i>
+								<%= appName %>
+							</h1>
 						</div>
 					</div>
 					

@@ -26,22 +26,17 @@ gulp.task('vendorJS', function () {
 	})
 			.on('error', utils.onErr);
 
-	_.map(pack.paths.src.vendor.deps, function (id) {
-		b.require(id, {
-			expose: id
-		});
-	});
+	let deps = pack.paths.src.vendor.deps
+			.concat(pack.paths.src.vendor.libs);
 
-	_.map(pack.paths.src.vendor.libs, function (path, name) {
-		b.require(path, {
-			expose: name
-		});
+	_.map(deps, function (id) {
+		b.require(id);
 	});
 
 	var stream = b.bundle()
 			.pipe(source(pack.paths.dist.vendor.js.file));
 
-	if (process.env.NODE_ENV == 'production')
+	if (process.env.NODE_ENV == 'production' || process.env.MINIFY == 'true')
 		stream = stream
 				.pipe(buffer())
 				.pipe(plugins.uglify());

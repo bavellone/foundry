@@ -11,7 +11,13 @@ import db from './db';
 
 module.exports = function () {
 	var app = express();
-	app.disable('x-powered-by');
+	
+	// Get rid of express header
+	app.set('x-powered-by', false);
+	
+	// Use IP address from HAProxy X-Forwarded-For header
+	app.set('trust proxy', true);
+	
 	app.db = new db(config.db);
 
 	http.globalAgent.maxSockets = config.connectionPool;
@@ -26,13 +32,9 @@ module.exports = function () {
 
 	// Initialize API
 	require('./api.js')(app);
-
-	app.use('/fonts.gstatic*', (req, res) => {
-		res.sendStatus(404);
-	});
-
-	app.all('/*', function (req, res) {
-		res.sendFile(path.resolve('./public/index.html'));
+	
+	app.all('/*', (req, res) => {
+		res.status(404);
 	});
 
 	// Error handling

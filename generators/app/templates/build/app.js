@@ -21,10 +21,7 @@ function makeBundle() {
 		debug: process.env.NODE_ENV != 'production',
 		cache: {}, packageCache: {}, fullPaths: true
 	})
-			.external(pack.paths.src.vendor.deps)
-			.external(_.map(pack.paths.src.vendor.libs, (id, name) => {
-				return name
-			}))
+			.external(pack.paths.src.vendor.deps.concat(pack.paths.src.vendor.libs))
 			.on('error', utils.onErr);
 }
 
@@ -48,7 +45,7 @@ function bundleApp(b) {
 			.on('error', utils.onErr)
 			.pipe(source(pack.paths.dist.app.js.file));
 
-	if (process.env.NODE_ENV == 'production')
+	if (process.env.NODE_ENV == 'production' || process.env.MINIFY == 'true')
 		bundle = bundle
 				.pipe(buffer())
 				.pipe(plugins.uglify());
@@ -89,7 +86,11 @@ function appTest() {
 }
 
 gulp.task('appJS', appJS);
-gulp.task('watchAppJS', watchAppJS);
 gulp.task('appSCSS', appSCSS);
 gulp.task('app', ['appJS', 'appSCSS']);
 gulp.task('test', appTest);
+
+gulp.task('watch:app', function () {
+	gulp.watch([pack.paths.src.app.scss], ['appSCSS']);
+	return watchAppJS();
+});

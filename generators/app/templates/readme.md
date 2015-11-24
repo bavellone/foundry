@@ -1,4 +1,4 @@
 # <%= appName %>
 
-## Intro
-Welcome to <%= appName %>!
+## Project Description
+<%= appDesc %>

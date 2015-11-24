@@ -15,9 +15,6 @@ Backbone.nav = {
 
 Backbone.auth = new RxStream();
 
-_.map(_.filter(_.keys(API), (key) => !_.includes(['version', 'path'], key)), function (stream) {
-	Backbone[stream] = {
-		meta: new RxStream(),
-		data: API[stream].list()
-	};
+_.map(_.filter(_.keys(API), (key) => !_.includes('config', key)), function (stream) {
+	Backbone[stream] = API[stream];
 });

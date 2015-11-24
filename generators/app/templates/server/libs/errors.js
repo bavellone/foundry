@@ -25,7 +25,7 @@ module.exports.wrap = wrap;
 module.exports.saveCB = function (next, cb) {
 	return function (err, data) {
 		if (err) {
-			debug('Save Error!');
+			debug('Save Error!', err);
 			return next(wrap(err));
 		}
 		return cb(data);

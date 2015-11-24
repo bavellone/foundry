@@ -46,8 +46,7 @@ export default class Navbar extends React.Component {
 				<div className="item">
 					<div className="header">Management</div>
 					<div className="menu">
-						<Link className="item" to='overview' onClick={this.handleNavClick.bind(this)}>Overview</Link>
-						<Link className="item" to='library' onClick={this.handleNavClick.bind(this)}>Library</Link>
+						<Link className="item" to='home' onClick={this.handleNavClick.bind(this)}>Home</Link>
 					</div>
 				</div>
 				<div className="item">

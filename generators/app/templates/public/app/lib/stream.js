@@ -8,6 +8,9 @@ import Rx from 'rx';
  */
 export class RxStream {
 	constructor() {
+		this.initStream();
+	}
+	initStream() {
 		this.stream = new Rx.Subject();
 	}
 	emit(msg) {
@@ -19,12 +22,11 @@ export class RxStream {
 		return this;
 	}
 	listen(type) {
-		return this.stream
-			.filter((msg) => msg.type == type)
-			.pluck('data');
-	}
-	listenAll() {
-		return this.stream;
+		return type 
+				?	this.stream
+						.filter((msg) => msg.type == type)
+						.pluck('data')
+				:	this.stream;
 	}
 	close() {
 		this.stream.onCompleted();
@@ -32,6 +34,11 @@ export class RxStream {
 	}
 }
 
+export class RxDataStream extends RxStream {
+	intiStream() {
+		this.stream = new Rx.BehaviorSubject();
+	}
+}
 
 /**
  * The Msg class is used to provide structure to messages passed over an RxStream.

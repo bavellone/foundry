@@ -3,6 +3,8 @@ var yo = require('yeoman-generator'),
 	chalk = require('chalk'),
 	util = require('util');
 
+require('babel/register')();
+
 // Initialize the generator
 var Generator = module.exports = function Generator(args, options) {
 	yo.generators.Base.apply(this, arguments);

@@ -12,13 +12,6 @@ gulp.task('watch:test', function () {
 	gulp.watch(['server/**/*.js', 'server/**/*.jsx'], ['test']);
 });
 
-gulp.task('watch:app', function () {
-    gulp.watch([pack.paths.src.app.scss], ['appSCSS']);
-    gulp.run('watchAppJS');
-});
-
-gulp.task('watch:files', ['watch:app', 'watch:test']);
-
 gulp.task('watch:server', function () {
     nodemon({
         script: pack.main,
@@ -27,6 +20,6 @@ gulp.task('watch:server', function () {
     })
 });
 
-gulp.task('watch', ['watch:server', 'watch:files']);
+gulp.task('watch', ['watch:server', 'watch:app', 'watch:test']);
 
 gulp.task('default', ['watch']);

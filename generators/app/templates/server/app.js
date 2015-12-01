@@ -32,7 +32,8 @@ module.exports = function () {
 
 	// Initialize API
 	require('./api.js')(app);
-	
+
+	// Send 404 for any requests that don't match API or static routes
 	app.all('/*', (req, res) => {
 		res.status(404);
 	});

@@ -14,15 +14,18 @@
 		"body-parser": "^1.14.1",
 		"chai": "^2.3.0",
 		"chalk": "^0.5.1",
+		"classnames": "^2.2.0",
 		"debug": "^2.2.0",
 		"express": "^4.13.3",
 		"glob": "^4.5.3",
 		"lodash": "^3.10.1",
 		"mandrill-api": "^1.0.45",
+		"mkdirp": "^0.5.1",
 		"moment": "^2.10.6",
 		"q": "^1.4.1",
 		"react": "^0.13.3",
 		"react-router": "^0.13.3",
+		"rimraf": "^2.4.4",
 		"rx": "^4.0.0",
 		"seraph": "^0.13.3",
 		"seraph-model": "^0.7.5"
@@ -125,9 +128,7 @@
 					"bower_components/fontawesome/css/font-awesome.css",
 					"bower_components/semantic/dist/semantic.css"
 				],
-				"fonts": [
-					"bower_components/fontawesome/fonts/*"
-				]
+				"fonts": "bower_components/fontawesome/fonts"
 			}
 		},
 		"dist": {
@@ -135,7 +136,7 @@
 				"js": {
 					"file": "app.bundle.js",
 					"dir": "public/assets/js",
-					"entryPoint": "public/app/init.js"
+					"entryPoint": "public/app/index.js"
 				},
 				"css": {
 					"file": "app.bundle.css",

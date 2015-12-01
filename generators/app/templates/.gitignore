@@ -2,5 +2,6 @@
 .vagrant/
 node_modules/
 bower_components/
+!public/assets/index.html
 public/assets/
 public/semantic/

@@ -3,8 +3,8 @@
 
 import React from 'react';
 import {Route, DefaultRoute} from 'react-router'
-import App from './components/app';
-import Home from './components/home';
+import App from './views/app';
+import Home from './views/home';
 
 const Routes = (
 	<Route handler={App} name='root' path='/'>

@@ -8,7 +8,7 @@ var chalk = require('chalk'),
 var app = module.exports = require('./server/app.js')();
 
 app.listen(config.port, function() {
-	console.log(chalk.green('<%= appName %>') + ' listening on port', chalk.green(config.port), 'in ' + chalk.green(process.env.NODE_ENV || 'prod') + ' mode');
+	console.log(chalk.green('<%= appName %>') + ' listening on port', chalk.green(config.port), 'in ' + chalk.green(process.env.NODE_ENV || 'development') + ' mode');
 });
 
 process.on('uncaughtException', function(err) {

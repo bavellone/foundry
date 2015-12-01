@@ -49,3 +49,33 @@ export class Msg {
 		this.data = data;
 	}
 }
+
+/**
+ * The RxReact HOC (Higher-order component) wraps the given component to extend its functionality and take care of 
+ * disposing streams when the component is unmounted. It also provides a method to add a stream, which is needed to 
+ * enable auto-disposal.
+ * 
+ * @param Component
+ * @returns {RxEnhanced}
+ * @constructor
+ */
+export function RxReact(Component) {
+	return class RxEnhanced extends Component {
+		constructor() {
+			this._streams = [];
+			super();
+		};
+
+		componentWillUnmount() {
+			if (super.componentWillUnmount)
+				super.componentWillUnmount();
+
+			this._streams.map((stream) => stream.dispose ? stream.dispose() : stream.stream.dispose());
+		}
+
+		_addStream = (stream) => {
+			this._streams.push(stream);
+			return stream;
+		}
+	}
+}

@@ -2,10 +2,18 @@
 	background: rgba(255, 255, 255, .2);
 }
 
+.form.section {
+	margin: 1.5em;
+}
+
 @media only screen and (min-width: 1350px) {
 	.ui.container {
 		width: 1277px;
 		margin-left: auto !important;
 		margin-right: auto !important;
 	}
+}
+
+.ui.form .inline.fields .field > input {
+	max-width: 100%;
 }

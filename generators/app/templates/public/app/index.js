@@ -17,7 +17,7 @@ let data = {};
 
 
 Router.run(Routes, Router.HistoryLocation, (Handler, state) => {
-	React.render(<Handler {...data} routerState={state}/>, document.querySelector('body'));
+	React.render(<Handler {...data} routerState={state}/>, document.querySelector('#app'));
 	$('[data-title], [data-content]').popup();
 	Backbone.nav.transition
 		.emitMsg('navTo', state);

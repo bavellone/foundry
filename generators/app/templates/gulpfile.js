@@ -1,5 +1,5 @@
 /*eslint-env node */
-require('babel/register')();
+require('babel-core/register')();
 
 var gulp = require('gulp'),
 	nodemon = require('gulp-nodemon'),
@@ -20,6 +20,6 @@ gulp.task('watch:server', function () {
     })
 });
 
-gulp.task('watch', ['watch:server', 'watch:app', 'watch:test']);
+gulp.task('watch', ['watch:server', 'watch:app']);
 
 gulp.task('default', ['watch']);

@@ -62,8 +62,8 @@ export class Msg {
 export function RxReact(Component) {
 	return class RxEnhanced extends Component {
 		constructor() {
-			this._streams = [];
 			super();
+			this._streams = [];
 		};
 
 		componentWillUnmount() {

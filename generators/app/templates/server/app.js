@@ -22,8 +22,11 @@ module.exports = function () {
 
 	http.globalAgent.maxSockets = config.connectionPool;
 
+	// Serve app shell when root is requested
+	app.use('/', express.static(path.resolve('./public/assets/')));
+
 	// Setting the app router and static folder
-	app.use(express.static(path.resolve('./public/assets')));
+	app.use('/assets', express.static(path.resolve('./public/assets')));
 
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({

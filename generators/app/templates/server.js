@@ -1,5 +1,5 @@
 /*eslint-env node*/
-require('babel/register')();
+require('babel-core/register')();
 
 var chalk = require('chalk'),
 	config = require('./server/config'),

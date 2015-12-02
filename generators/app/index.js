@@ -3,8 +3,6 @@ var yo = require('yeoman-generator'),
 	chalk = require('chalk'),
 	util = require('util');
 
-require('babel/register')();
-
 // Initialize the generator
 var Generator = module.exports = function Generator(args, options) {
 	yo.generators.Base.apply(this, arguments);
@@ -50,11 +48,5 @@ Generator.prototype.install = {
 };
 
 Generator.prototype.end = function () {
-	console.log(chalk.green('Running post-install...'));
-	var done = this.async();
-	this.spawnCommand('gulp', ['build'])
-		.on('close', function () {
-			console.log(chalk.green(this.appName + ' ready for development!'));
-			done();
-		}.bind(this));
+	console.log(chalk.green('Almost done! Run "gulp build" to complete installation'));
 };

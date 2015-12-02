@@ -2,12 +2,11 @@ import _ from 'lodash';
 import $ from 'jquery';
 
 // Define the API object
-let API = {
-	config: {
-		version: '1',
-		path: '/api'
-	}
-};
+let API = {},
+		config = {
+			version: '1',
+			path: '/api'
+		};
 
 /**
  * The API_Endpoint acts as a wrapper around a remote endpoint. It returns
@@ -21,7 +20,7 @@ class API_Endpoint {
 		// Attach a handle for each route
 		_.map(routes, (route, key) => {
 			this[key] = () => {
-				return API_Endpoint[route.method || 'GET'](`${API.config.path}/${this.uri}/${route.uri || key}`)
+				return API_Endpoint[route.method || 'GET'](`${config.path}/${this.uri}/${route.uri || key}`)
 			}
 		})
 	}
@@ -54,4 +53,12 @@ API.endpoint = new API_Endpoint('endpoint', {
 });
 
 
-export default API;
+export default function init(Backbone) {
+	Backbone.api = {};
+
+	// Initialize API routes
+	_.map(_.keys(API), stream => {
+		Backbone.api[stream] = API[stream];
+	});
+}
+

@@ -19,6 +19,7 @@
     "objectLiteralDuplicateProperties": true,
     "objectLiteralShorthandMethods": true,
     "objectLiteralShorthandProperties": true,
+    "experimentalObjectRestSpread": true,
     "templateStrings": true,
     "blockBindings": true
   },
@@ -38,6 +39,7 @@
     "strict": 0,
     "no-use-before-define": 0,
     "curly": [2, "multi"],
+    "lodash/import": 0,
     "react/display-name": 0,
     "react/jsx-boolean-value": 1,
     "react/jsx-closing-bracket-location": 1,

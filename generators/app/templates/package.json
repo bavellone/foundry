@@ -109,8 +109,10 @@
 			},
 			"vendor": {
 				"deps": [
+					"classnames",
 					"react",
 					"react-router",
+					"react/lib/ReactCSSTransitionGroup",
 					"rx",
 					"lodash"
 				],

@@ -41,4 +41,4 @@ function randomInt(low, high) {
 	return Math.floor(Math.random() * (high - low) + low);
 }
 
-export default _.merge({}, all, (process.env.NODE_ENV ? eval(process.env.NODE_ENV) : development));
+module.exports = _.merge({}, all, (process.env.NODE_ENV ? eval(process.env.NODE_ENV) : development));

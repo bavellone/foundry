@@ -1,17 +1,10 @@
 /*eslint-env node*/
 var config = require('./config'),
-		_ = require('lodash'),
-		path = require('path'),
-		debug = require('debug')('app:api'),
-		utils = require('./libs/utils');
+	_ = require('lodash'),
+	debug = require('debug')('app:api'),
+	utils = require('./libs/utils');
 
-
-var routes = utils.globMap('./server/api/**/api.js', function (paths) {
-	return {
-		name: path.dirname(paths.full).split(path.sep).pop(), // Name of module
-		app: require(paths.full) // Module API
-	};
-});
+var modules = require('./api/modules');
 
 var basePath = config.api.path + '/';
 
@@ -20,9 +13,9 @@ module.exports = function (app) {
 		app.locals.api = {};
 		debug('Initializing API...');
 		app.locals.apiPath = basePath;
-		_.each(routes, function (route) {
-			app.use(basePath + route.name, route.app());
-			app.locals.api[route.name] = basePath + route.name;
+		_.map(modules, function (module) {
+			app.use(basePath + module.name, module.app());
+			app.locals.api[module.name] = basePath + module.name;
 		});
 		debug('API initialized!');
 	}

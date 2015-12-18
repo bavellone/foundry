@@ -63,18 +63,6 @@ body {
 	}
 }
 
-.site.masthead {
-	h1.header {
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-		font-size:3rem;
-		text-align: left;
-	}
-	.ui.menu .ui.button {
-		margin-left: 0.5em;
-	}
-}
-
 #site-wrapper {
 	min-height: 100%;
 	position: relative;
@@ -97,9 +85,9 @@ body {
 		-ms-transform: translateX(-100%);
 		-o-transform: translateX(-100%);
 		transform: translateX(-100%);
-		
+
 		@include transition(all .2s ease-in-out);
-		
+
 		&.active {
 			-webkit-transform: translateX(0%);
 			-moz-transform: translateX(0%);
@@ -124,7 +112,7 @@ body {
 	@media print {
 		padding-bottom: 0;
 	}
-	
+
 	.ui.site.segment {
 		border-radius: 0;
 	}

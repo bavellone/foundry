@@ -44,9 +44,9 @@ class App extends React.Component {
 	};
 	componentDidMount() {
 		this._addStream(
-				Backbone.page.resize
-						.debounce(100)
-						.subscribe(() => this.forceUpdate())
+			Backbone.page.resize
+				.debounce(100)
+				.subscribe(() => this.forceUpdate())
 		)
 	}
 	render() {
@@ -54,7 +54,7 @@ class App extends React.Component {
 			<div id="site-wrapper">
 				
 				<header id="site-header">
-					<div className="ui inverted blue site aligned segment">
+					<div id="site-header-menu-bar" className="ui inverted blue site aligned segment">
 						<div className="ui container">
 							<h1 className="ui inverted header">
 								<i className="fa fa-fw fa-bars" onClick={this._showNav}></i>
@@ -73,9 +73,7 @@ class App extends React.Component {
 					<RouteHandler {...this.props}/>
 				</div>
 				
-				<div id="modal-overlay" className={classnames(this._modalClasses())} onClick={this._hideNav}>
-					
-				</div>
+				<div id="modal-overlay" className={classnames(this._modalClasses())} onClick={this._hideNav}></div>
 			</div>
 		);
 	}

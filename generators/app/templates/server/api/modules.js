@@ -10,8 +10,6 @@ module.exports = utils.globMap('./server/api/*/', function (paths) {
 
 	return {
 		name: paths.file, // Name of module
-		app, // Express Router object
-		api: app.api, // API for this module
-		model: app.model // Model for this module
+		app // Express Router object
 	};
 });

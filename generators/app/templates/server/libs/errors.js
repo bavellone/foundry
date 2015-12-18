@@ -2,8 +2,8 @@
 'use strict';
 
 var _ = require('lodash'),
-		util = require('util'),
-		debug = require('debug')('app:lib:error');
+	util = require('util'),
+	debug = require('debug')('app:lib:error');
 
 /**
  * Converts an error into an application error
@@ -11,7 +11,9 @@ var _ = require('lodash'),
  */
 var wrap = function (err) {
 	if (err.code == 'Neo.ClientError.Schema.ConstraintViolation')
-		return new Neo4jDuplicate(err.message);
+		return new Neo4jDuplicate(err);
+	else if (err.code == 'Neo.ClientError.Statement.EntityNotFound')
+		return new Neo4jNotFound(err);
 	else {
 		console.error('UNKNOWN ERROR');
 		console.error(err);
@@ -87,7 +89,7 @@ module.exports.errors = {
 module.exports.catchAll = function catchAll(err, req, res, next) {
 	if (err instanceof BaseError) {
 		debug('Caught Application Error');
-		debug(err.name + ': ' + err.desc);
+		debug(err.name, err.desc);
 	}
 	else {
 		debug('Caught error');
@@ -107,21 +109,48 @@ module.exports.catchAll = function catchAll(err, req, res, next) {
 };
 
 
-let Neo4jError = function (msg) {
+let Neo4jError = function (err) {
 	Error.captureStackTrace(this, this.constructor);
 	this.name = this.constructor.name;
-	this.message = msg;
+	this.desc = `${err.code}: ${err.message}`;
+	this.code = 500;
+	debug(`Neo4J error occurred! ${this.desc}`);
 };
 
 util.inherits(Neo4jError, BaseError);
 
-let Neo4jDuplicate = function (msg) {
+let Neo4jDuplicate = function (err) {
 	Error.captureStackTrace(this, this.constructor);
 	this.name = this.constructor.name;
-	this.message = msg;
+	this.desc = err.message;
+	this.code = 400;
+	debug('Neo4J Duplicate error occurred', this.desc);
 };
 
 util.inherits(Neo4jDuplicate, BaseError);
 
 module.exports.Neo4jError = Neo4jError;
 module.exports.Neo4jDuplicate = Neo4jDuplicate;
+
+let Neo4jNotFound = function (err) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = err.message;
+	this.code = 400;
+	debug(`Neo4J Not Found error occurred! ${this.desc}`);
+};
+
+util.inherits(Neo4jNotFound, BaseError);
+module.exports.Neo4jNotFound = Neo4jNotFound;
+
+
+let ValidationError = function (msg) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = msg;
+	this.code = 400;
+	debug('Validation error occurred', msg);
+};
+
+util.inherits(ValidationError, BaseError);
+module.exports.ValidationError = ValidationError;

@@ -3,21 +3,19 @@ var express = require('express'),
 	errors = require('../../libs/errors'),
 	_ = require('lodash');
 
-import api from './api';
-import model from './model';
+import {list, create, read, update, destroy} from './api';
 
-module.exports = App;
-
-function App() {
+module.exports = function UserModule() {
 	// Create the API router
 	var API = express.Router();
-	
+
 	// Attach routes
-	// ...
+	API.get('/', list);
+	API.post('/', create);
+	API.get('/:id', read);
+	API.put('/:id', update);
+	API.delete('/:id', destroy);
 
 	// Return the main app
 	return API;
-}
-
-App.api = api;
-App.model = model;
+};

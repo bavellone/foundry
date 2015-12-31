@@ -3,10 +3,10 @@ import $ from 'jquery';
 
 // Define the API object
 let API = {},
-		config = {
-			version: '1',
-			path: '/api'
-		};
+	config = {
+		version: '1',
+		path: '/api'
+	};
 
 /**
  * The API_Endpoint acts as a wrapper around a remote endpoint. It returns
@@ -19,24 +19,38 @@ class API_Endpoint {
 		this.routes = routes;
 		// Attach a handle for each route
 		_.map(routes, (route, key) => {
-			this[key] = () => {
-				return API_Endpoint[route.method || 'GET'](`${config.path}/${this.uri}/${route.uri || key}`)
+			this[key] = (args) => {
+				console.log(args);
+				return API_Endpoint[route.method || 'GET']({url: `${config.path}/${this.uri}${args.id ? '/' + args.id : ''}`, ...args})
 			}
 		})
 	}
-	static GET(...args) {
-		return $.getJSON(...args)
-	}
-	static POST(...args) {
-		return $.post(...args);
-	}
-	static PUT(...args) {
+
+	static GET(args) {
+		console.log(args);
 		return $.ajax({
-			method: 'PUT',
+			method: 'GET',
+			...args
+		})
+	}
+
+	static POST(args) {
+		return $.ajax({
+			method: 'GET',
+			contentType: 'application/json',
 			...args
 		});
 	}
-	static DELETE(...args) {
+
+	static PUT(args) {
+		return $.ajax({
+			method: 'PUT',
+			contentType: 'application/json',
+			...args
+		});
+	}
+
+	static DELETE(args) {
 		return $.ajax({
 			method: 'DELETE',
 			...args
@@ -48,8 +62,13 @@ class API_Endpoint {
  * Endpoint definitions
  */
 
-API.endpoint = new API_Endpoint('endpoint', {
-	list: {}
+API.user = new API_Endpoint('user', {
+	create: {
+		method: 'POST'
+	},
+	read: {
+		method: 'GET'
+	}
 });
 
 
@@ -61,4 +80,3 @@ export default function init(Backbone) {
 		Backbone.api[stream] = API[stream];
 	});
 }
-

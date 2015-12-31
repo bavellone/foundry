@@ -28,7 +28,12 @@ module.exports = function () {
 	// Setting the app router and static folder
 	app.use('/assets', express.static(path.resolve('./public/assets')));
 
+	// Setup parsers
 	app.use(bodyParser.json());
+
+	app.use((err, req, res, next) => {
+		res.status(400).send('Malformed Request');
+	});
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
@@ -37,8 +42,9 @@ module.exports = function () {
 	require('./api.js')(app);
 
 	// Send 404 for any requests that don't match API or static routes
-	app.all('/*', (req, res) => {
-		res.status(404);
+	app.use((req, res) => {
+		if (!req.url.endsWith('.', 3))
+			res.sendFile(path.resolve('./public/assets/index.html'))
 	});
 
 	// Error handling

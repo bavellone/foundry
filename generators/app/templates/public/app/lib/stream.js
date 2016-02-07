@@ -81,6 +81,6 @@ export function RxReact(Component) {
 		_addStream = (stream) => {
 			this._streams.push(stream);
 			return stream;
-		}
+		};
 	}
 }

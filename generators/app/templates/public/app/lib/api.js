@@ -19,41 +19,40 @@ class API_Endpoint {
 		this.routes = routes;
 		// Attach a handle for each route
 		_.map(routes, (route, key) => {
-			this[key] = (args) => {
-				console.log(args);
+			this[key] = (args = {}) => {
 				return API_Endpoint[route.method || 'GET']({url: `${config.path}/${this.uri}${args.id ? '/' + args.id : ''}`, ...args})
 			}
 		})
 	}
 
 	static GET(args) {
-		console.log(args);
 		return $.ajax({
-			method: 'GET',
-			...args
+			...args,
+			method: 'GET'
 		})
 	}
 
 	static POST(args) {
 		return $.ajax({
-			method: 'GET',
-			contentType: 'application/json',
-			...args
+			...args,
+			method: 'POST',
+			data: JSON.stringify(args.data || {}),
+			contentType: 'application/json'
 		});
 	}
 
 	static PUT(args) {
 		return $.ajax({
+			...args,
 			method: 'PUT',
-			contentType: 'application/json',
-			...args
+			contentType: 'application/json'
 		});
 	}
 
 	static DELETE(args) {
 		return $.ajax({
-			method: 'DELETE',
-			...args
+			...args,
+			method: 'DELETE'
 		});
 	}
 }

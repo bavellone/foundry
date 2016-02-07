@@ -2,8 +2,8 @@
 'use strict';
 
 var _ = require('lodash'),
-		util = require('util'),
-		debug = require('debug')('app:lib:error');
+	util = require('util'),
+	debug = require('debug')('app:lib:error');
 
 /**
  * Converts an error into an application error
@@ -11,7 +11,15 @@ var _ = require('lodash'),
  */
 var wrap = function (err) {
 	if (err.code == 'Neo.ClientError.Schema.ConstraintViolation')
-		return new Neo4jDuplicate(err.message);
+		return new Neo4jDuplicate(err);
+	else if (err.code == 'Neo.ClientError.Statement.EntityNotFound')
+		return new Neo4jNotFound(err);
+	else if (err.code == 'Neo.DatabaseError.Statement.ExecutionFailure')
+		return new Neo4jExecutionFailure('Query Execution Failed');
+	else if (err instanceof ValidationError)
+		return err;
+	else if (err.code == 'ENOTFOUND' || err.code == 'ECONNREFUSED') // Neo4j connection errors
+		return new DBConnectionError(err.toString());
 	else {
 		console.error('UNKNOWN ERROR');
 		console.error(err);
@@ -87,12 +95,12 @@ module.exports.errors = {
 module.exports.catchAll = function catchAll(err, req, res, next) {
 	if (err instanceof BaseError) {
 		debug('Caught Application Error');
-		debug(err.name + ': ' + err.desc);
+		debug(err.name, err.desc);
 	}
 	else {
 		debug('Caught error');
-		debug(err.toString());
-		debug(err.stack);
+		debug(err);
+		debug(`${err.code}\n${err.stackTrace}`);
 	}
 
 	res.status(err.code || 500);
@@ -107,21 +115,105 @@ module.exports.catchAll = function catchAll(err, req, res, next) {
 };
 
 
-let Neo4jError = function (msg) {
+let Neo4jError = function (err) {
 	Error.captureStackTrace(this, this.constructor);
 	this.name = this.constructor.name;
-	this.message = msg;
+	this.desc = `${err.code}: ${err.message}`;
+	this.code = 500;
+	debug(`Neo4J error occurred! ${this.desc}`);
 };
 
 util.inherits(Neo4jError, BaseError);
 
-let Neo4jDuplicate = function (msg) {
+let Neo4jDuplicate = function (err) {
 	Error.captureStackTrace(this, this.constructor);
 	this.name = this.constructor.name;
-	this.message = msg;
+	this.desc = err.message;
+	this.code = 400;
+	debug('Neo4J Duplicate error occurred', this.desc);
 };
 
 util.inherits(Neo4jDuplicate, BaseError);
 
 module.exports.Neo4jError = Neo4jError;
 module.exports.Neo4jDuplicate = Neo4jDuplicate;
+
+let Neo4jNotFound = function (err) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = err.message;
+	this.code = 400;
+	debug(`Neo4J Not Found error occurred! ${this.desc}`);
+};
+
+util.inherits(Neo4jNotFound, BaseError);
+module.exports.Neo4jNotFound = Neo4jNotFound;
+
+let Neo4jExecutionFailure = function (msg) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = msg;
+	this.code = 500;
+	debug(`Neo4J Execution error occurred: ${this.desc}`);
+};
+
+util.inherits(Neo4jExecutionFailure, BaseError);
+module.exports.Neo4jExecutionFailure = Neo4jExecutionFailure;
+
+let DBConnectionError = function (msg) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = msg;
+	this.code = 500;
+	debug(`Could not establish DB connection: ${this.desc}`);
+};
+
+util.inherits(DBConnectionError, BaseError);
+module.exports.DBConnectionError = DBConnectionError;
+
+let ValidationError = function (msg) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = _.values(msg)[0];
+	this.code = 400;
+	debug(`Validation error occurred: ${this.desc}`);
+};
+
+util.inherits(ValidationError, BaseError);
+module.exports.ValidationError = ValidationError;
+
+
+let MissingParameterError = function (msg) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = `[${msg}] is a required parameter`;
+	this.code = 400;
+	debug(`Missing Parameter error occurred: ${this.desc}`);
+};
+
+util.inherits(MissingParameterError, BaseError);
+module.exports.MissingParameterError = MissingParameterError;
+
+
+let MissingIDError = function () {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = `id must be specified`;
+	this.code = 400;
+	debug(`Missing ID error occurred: ${this.desc}`);
+};
+
+util.inherits(MissingIDError, BaseError);
+module.exports.MissingIDError = MissingIDError;
+
+
+let AuthDenied = function (msg) {
+	Error.captureStackTrace(this, this.constructor);
+	this.name = this.constructor.name;
+	this.desc = msg;
+	this.code = 401;
+	debug(`Auth Denied error occurred: ${this.desc}`);
+};
+
+util.inherits(AuthDenied, BaseError);
+module.exports.AuthDenied = AuthDenied;

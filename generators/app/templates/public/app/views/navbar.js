@@ -18,22 +18,13 @@ class Navbar extends React.Component {
 	render() {
 		const classes = 'ui vertical menu ' + (this.props.showNav ? 'active' : '');
 		return (
-				<nav className={classes}>
-					<div className="item">
-						<div className="header">
-							<%= appName %>
-						</div>
-						<div className="menu">
-							<Link className="item" to='home' onClick={this.props.hideNav}>Home</Link>
-						</div>
+			<nav className={classes}>
+				<div className="item">
+					<div className="menu">
+						<Link className="item" to='home' onClick={this.props.hideNav}>Home<i className='home icon'></i></Link>
 					</div>
-					<div className="item">
-						<div className="header">Settings</div>
-						<div className="menu">
-							<div className="item">Settings</div>
-						</div>
-					</div>
-				</nav>
+				</div>
+			</nav>
 		);
 	}
 }

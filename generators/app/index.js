@@ -38,7 +38,12 @@ Generator.prototype.prompting =  function () {
 
 // Copy and template all files
 Generator.prototype.initApp = function () {
-	this.directory('./')
+	this.directory('./');
+	
+	//this.mkdir('config');
+	// TODO - create token.key and token.pub in config dir for Auth tokens
+	
+	//this.mkdir('data');
 };
 
 Generator.prototype.install = {

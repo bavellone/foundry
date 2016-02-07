@@ -10,24 +10,29 @@ export class RxStream {
 	constructor() {
 		this.initStream();
 	}
+
 	initStream() {
 		this.stream = new Rx.Subject();
 	}
+
 	emit(msg) {
 		this.stream.onNext(msg);
 		return this;
 	}
+
 	emitMsg(...args) {
 		this.emit(new Msg(...args));
 		return this;
 	}
+
 	listen(type) {
-		return type 
-				?	this.stream
-						.filter((msg) => msg.type == type)
-						.pluck('data')
-				:	this.stream;
+		return type
+			? this.stream
+			.filter((msg) => msg.type == type)
+			.pluck('data')
+			: this.stream;
 	}
+
 	close() {
 		this.stream.onCompleted();
 		return this;
@@ -51,10 +56,10 @@ export class Msg {
 }
 
 /**
- * The RxReact HOC (Higher-order component) wraps the given component to extend its functionality and take care of 
- * disposing streams when the component is unmounted. It also provides a method to add a stream, which is needed to 
+ * The RxReact HOC (Higher-order component) wraps the given component to extend its functionality and take care of
+ * disposing streams when the component is unmounted. It also provides a method to add a stream, which is needed to
  * enable auto-disposal.
- * 
+ *
  * @param Component
  * @returns {RxEnhanced}
  * @constructor

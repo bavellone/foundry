@@ -14,7 +14,19 @@ var gulp = require('gulp'),
 	q = require('q');
 
 gulp.task('vendorCSS', function () {
+	var replace = {
+		'/assets/fonts': /(themes\/default\/assets\/fonts)/g // Replace path to semantic font-icons
+	};
+
 	return gulp.src(pack.paths.src.vendor.css)
+		.pipe(plugins.tap(function (file) {
+			// For each CSS file
+			file.contents = new Buffer( // Replace file contents
+				_.reduce(replace, function (file, regex, str) { // Perform successive iterations on file contents
+					return file.replace(regex, str); // Replace any string in file contents matched by regex 
+				}, file.contents.toString()) // Need to use string instead of buffer
+			);
+		}))
 		.pipe(plugins.concat(pack.paths.dist.vendor.css.file))
 		.pipe(plugins.bytediff.start())
 		.pipe(plugins.minifyCss())

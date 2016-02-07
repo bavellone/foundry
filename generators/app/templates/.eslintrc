@@ -21,7 +21,6 @@
     "objectLiteralShorthandMethods": true,
     "objectLiteralShorthandProperties": true,
     "experimentalObjectRestSpread": true,
-    "templateStrings": true,
     "blockBindings": true
   },
   "globals": {

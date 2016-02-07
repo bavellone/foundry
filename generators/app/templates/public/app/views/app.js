@@ -18,6 +18,15 @@ class App extends React.Component {
 		showNav: false,
 		delayHidden: false
 	};
+
+	componentDidMount() {
+		this._addStream(
+			Backbone.page.resize
+				.debounce(100)
+				.subscribe(() => this.forceUpdate())
+		)
+	}
+
 	_setOverlay = (show) => {
 		this.setState({
 			showOverlay: show,
@@ -43,15 +52,7 @@ class App extends React.Component {
 			hidden: !this.state.showOverlay && !this.state.delayHidden
 		}
 	};
-	
-	componentDidMount() {
-		this._addStream(
-			Backbone.page.resize
-				.debounce(100)
-				.subscribe(() => this.forceUpdate())
-		)
-	}
-	
+
 	render() {
 		return (
 			<div id="site-wrapper">
@@ -60,8 +61,8 @@ class App extends React.Component {
 					<div id="site-header-menu-bar" className="ui inverted blue site aligned segment">
 						<div className="ui container">
 							<h1 className="ui inverted header">
-								<i className="fa fa-fw fa-bars" onClick={this._showNav}></i>
-								<span onClick={this._showNav} className="link"><%= appName %></span>
+
+								<span onClick={this._showNav} className="link"><i className="bars icon" onClick={this._showNav}></i> <%= appName %></span>
 							</h1>
 						</div>
 					</div>

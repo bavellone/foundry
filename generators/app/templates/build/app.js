@@ -5,6 +5,7 @@ var gulp = require('gulp'),
 	}),
 	notifier = require('node-notifier'),
 	browserify = require('browserify'),
+	chalk = require('chalk'),
 	watchify = require('watchify'),
 	babelify = require('babelify'),
 	source = require('vinyl-source-stream'),
@@ -79,7 +80,7 @@ function appTest() {
 	return gulp.src(pack.paths.src.app.test, {read: false})
 		.pipe(plugins.mocha({
 			reporter: 'mocha-unfunk-reporter',
-			slow: 15
+			slow: 20
 		}))
 		.on('error', function (err) {
 			notifier.notify({
@@ -87,7 +88,8 @@ function appTest() {
 				message: err.message,
 				sound: true
 			});
-			console.log('Error stack', err.stack);
+			console.error(chalk.red(err.message));
+			process.exit(0);
 		});
 }
 

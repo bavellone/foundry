@@ -39,6 +39,11 @@ export default function init(Backbone) {
 			.subscribe(() => {
 				console.log('Toggling nav menu');
 			});
+
+	Backbone.page.resize
+		.subscribe(() => {
+			console.log('resize');
+		})
 }
 
 

@@ -6,21 +6,31 @@
 'use strict';
 
 import q from 'q';
+import _ from 'lodash';
 import _validate from 'validate.js';
 
 export default class Schema {
 	constructor(data = {}) {
 		this.data = data;
 	}
-	static validate = (data = {}, ops = {}) => {
-		let defer = q.defer(),
-				err;
-		if (err = _validate(data, this.constraints, ops))
-			defer.reject(err);
-		else 
-			defer.resolve();
-		
-		return defer.promise;
-	};
+
 	constraints = {};
+	blacklist = [];
+
+	validate(ops = {}) {
+		let err;
+
+		if (err = _validate(this.data, this.constraints, ops))
+			return q.reject(err);
+		else
+			return q.resolve(this.data);
+	}
+
+	static toJSON(data, blacklist) {
+		return _.omit(data, blacklist)
+	}
+
+	toJSON() {
+		return Schema.toJSON(this.data, this.blacklist)
+	}
 }

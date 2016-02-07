@@ -6,16 +6,25 @@ import Schema from './schema';
 
 export default class UserSchema extends Schema {
 	constructor(data) {
-		super(data);
+		super(data)
 	}
+
 	static type = 'User';
 	constraints = {
-		name: {
+		email: {
+			presence: true,
+			email: {
+				message: 'looks invalid'
+			}
+		},
+		password: {
 			presence: true,
 			length: {
-				minimum: 2,
-				message: 'must be 2 characters'
+				minimum: 3
 			}
+		},
+		roles: {
+			inclusion: ['user', 'admin']
 		}
 	}
 }

@@ -26,5 +26,5 @@ export default class UserSchema extends Schema {
 		roles: {
 			inclusion: ['user', 'admin']
 		}
-	}
+	};
 }

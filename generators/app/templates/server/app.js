@@ -54,28 +54,30 @@ module.exports = function () {
 
 
 	app.ready = DB.connect(config.db)
-		.then(db =>
-			debug('DB initialized') || (app.db = db)
-			, err =>
-				debug(err)
+		.then(
+			db => debug('DB initialized') || (app.db = db),
+			err => debug(err)
 		)
-		.then(() => {
-			// Initialize API
-			return require('./api.js')(app);
-		})
-		.then(() => {
-			debug('API initialized!');
+		.then(
+			() => require('./api.js')(app),
+			err => debug(err)
+		)
+		.then(
+			() => {
+				debug('API initialized!');
 
-			// Send 404 for any requests that don't match API or static routes
-			app.use((req, res) => {
-				res.status(404).send('Not Found');
-			});
+				// Send 404 for any requests that don't match API or static routes
+				app.use((req, res) => {
+					res.status(404).send('Not Found');
+				});
 
-			// Error handling
-			app.use(errors.catchAll);
+				// Error handling
+				app.use(errors.catchAll);
 
-			debug('Application initialized!');
-		});
+				debug('Application initialized!');
+			},
+			err => debug(err)
+		);
 
 	return app;
 };

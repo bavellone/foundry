@@ -22,9 +22,8 @@ module.exports = function (app) {
 				debug(`Initialized ${module.name}API...`);
 			});
 
-		});
+		}, err => debug(err));
 	else
 		return debug('API disabled!') || q.resolve();
-
 };
 

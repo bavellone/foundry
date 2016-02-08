@@ -1,7 +1,10 @@
 var yo = require('yeoman-generator'),
 	_ = require('lodash'),
 	chalk = require('chalk'),
+	spawn = require('child_process').spawn,
 	util = require('util');
+
+const opensslGenRSA = 'openssl genrsa | tee config/token.key | openssl rsa -pubout > config/token.pub';
 
 // Initialize the generator
 var Generator = module.exports = function Generator(args, options) {
@@ -38,12 +41,19 @@ Generator.prototype.prompting =  function () {
 
 // Copy and template all files
 Generator.prototype.initApp = function () {
+	var done = this.async();
 	this.directory('./');
+	this.mkdir('data');
+	this.mkdir('config');
 	
-	//this.mkdir('config');
-	// TODO - create token.key and token.pub in config dir for Auth tokens
-	
-	//this.mkdir('data');
+	spawn('sh', ['-c', opensslGenRSA], {
+		cwd: process.cwd()
+	})
+		.on('error', function (err) {
+			console.log(err);
+			done(err);
+		})
+		.on('exit', done);
 };
 
 Generator.prototype.install = {

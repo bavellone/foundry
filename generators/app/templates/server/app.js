@@ -6,6 +6,7 @@ var path = require('path'),
 	bodyParser = require('body-parser'),
 	cookieParser = require('cookie-parser'),
 	http = require('http'),
+	_ = require('lodash'),
 	debug = require('debug')('app:init'),
 	errors = require('./libs/errors');
 
@@ -26,16 +27,26 @@ module.exports = function () {
 		DB.connected.then(db => {
 			req.db = db;
 			next();
-		})
+		}, () => next())
 	});
 
 	http.globalAgent.maxSockets = config.connectionPool;
 
-	// Serve app shell when root is requested
-	app.use('/', express.static(path.resolve('./public/assets/')));
+	app.get('/*', (req, res, next) => {
+		if (_.includes(req.get('Accept'), 'text/html'))
+			req.url = '/';
+		next();
+	});
 
-	// Setting the app router and static folder
-	app.use('/assets', express.static(path.resolve('./public/assets')));
+	// Serve app shell when root is requested
+	app.get('/', (req, res, next) => {
+		res.sendFile('/index.html', {root: config.dataDir}, err => {
+			if (err) {
+				console.log(err);
+				res.status(err.status).end();
+			}
+		});
+	});
 	app.use('/assets', express.static(path.resolve(config.dataDir)));
 
 	// Setup parsers
@@ -51,8 +62,7 @@ module.exports = function () {
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
-
-
+	
 	app.ready = DB.connect(config.db)
 		.then(
 			db => debug('DB initialized') || (app.db = db),

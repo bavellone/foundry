@@ -14,6 +14,7 @@ var gulp = require('gulp'),
 	utils = require('./utils'),
 	fs = require('fs'),
 	path = require('path'),
+	ncp = require('ncp'),
 	_ = require('lodash');
 
 function makeBundle(cb) {
@@ -30,7 +31,7 @@ function makeBundle(cb) {
 }
 
 function appJS(cb) {
-	fs.symlink(path.resolve('public/index.html'), path.resolve('public/assets/index.html'), 'file', () => {
+	ncp.ncp(path.resolve('public/index.html'), path.resolve('assets/index.html'), () => {
 		bundleApp(makeBundle(cb))
 	});
 }

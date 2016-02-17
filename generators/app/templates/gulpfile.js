@@ -3,7 +3,6 @@ require('babel-core/register')();
 
 var gulp = require('gulp'),
 	nodemon = require('gulp-nodemon'),
-	run = require('run-sequence'),
 	pack = require('./package');
 
 require('./build/main');

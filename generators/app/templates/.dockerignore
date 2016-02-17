@@ -6,6 +6,3 @@
 bower_components/
 node_modules/
 test/
-public/assets/
-public/semantic/
-!public/assets/favicon.png

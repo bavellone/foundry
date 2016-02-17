@@ -8,7 +8,7 @@ import Home from './views/home';
 
 const Routes = (
 	<Route handler={App} name='root' path='/'>
-		<DefaultRoute handler={Home} name='home'/>
+		<DefaultRoute handler={Home} name={Home.route}/>
 	</Route>
 );
 

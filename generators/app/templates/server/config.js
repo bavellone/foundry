@@ -7,7 +7,7 @@ var all = {
 			namespace: '<%= appNS %>'
 		},
 		port: process.env.PORT || 80,
-		dataDir: './data',
+		dataDir: './assets',
 		connectionPool: 1000,
 		api: {
 			path: '/api'

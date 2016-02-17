@@ -11,7 +11,8 @@ var gulp = require('gulp'),
 	pack = require('../package'),
 	path = require('path'),
 	fs = require('fs'),
-	q = require('q');
+	q = require('q'),
+	ncp = require('ncp');
 
 gulp.task('vendorCSS', function () {
 	var replace = {
@@ -41,7 +42,7 @@ gulp.task('vendorJS', function () {
 	})
 		.on('error', utils.onErr);
 
-	let deps = pack.paths.src.vendor.deps
+	var deps = pack.paths.src.vendor.deps
 		.concat(pack.paths.src.vendor.libs);
 
 	_.map(deps, function (id) {
@@ -61,9 +62,8 @@ gulp.task('vendorJS', function () {
 
 gulp.task('vendorMisc', function (cb) {
 	q.all([
-		q.nfcall(fs.symlink, path.resolve(pack.paths.src.vendor.fonts), path.resolve(pack.paths.dist.vendor.fonts), 'dir'),
-		q.nfcall(fs.symlink, path.resolve('bower_components/semantic/dist/themes'), path.resolve(pack.paths.dist.app.css.dir + '/themes'), 'dir')
-	]).then(() => cb());
+		q.nfcall(ncp.ncp, path.resolve(pack.paths.src.vendor.fonts), path.resolve(pack.paths.dist.vendor.fonts))
+	]).then(() => cb(), err => console.error(err));
 });
 
 gulp.task('vendor', ['vendorJS', 'vendorCSS', 'vendorMisc']);

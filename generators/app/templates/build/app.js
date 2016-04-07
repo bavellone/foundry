@@ -12,10 +12,8 @@ var gulp = require('gulp'),
 	buffer = require('vinyl-buffer'),
 	pack = require('../package'),
 	utils = require('./utils'),
-	fs = require('fs'),
-	path = require('path'),
-	ncp = require('ncp'),
-	_ = require('lodash');
+	fse = require('fs-extra'),
+	path = require('path');
 
 function makeBundle(cb) {
 	return browserify({
@@ -31,7 +29,9 @@ function makeBundle(cb) {
 }
 
 function appJS(cb) {
-	ncp.ncp(path.resolve('public/index.html'), path.resolve('assets/index.html'), () => {
+	fse.copy(path.resolve('public/index.html'), path.resolve('assets/index.html'), (err) => {
+		if (err)
+			console.error(err);
 		bundleApp(makeBundle(cb))
 	});
 }
@@ -63,8 +63,8 @@ function bundleApp(b) {
 		.on('end', utils.onEnd('AppJS Bundled!', 'green'));
 }
 
-function appSCSS() {
-	return gulp.src(pack.paths.src.app.scss)
+function appSCSS(cb) {
+	gulp.src(pack.paths.src.app.scss)
 		.pipe(plugins.concat(pack.paths.dist.app.css.file))
 		.pipe(plugins.sass())
 		.on('error', function (err) {
@@ -74,7 +74,11 @@ function appSCSS() {
 		.pipe(plugins.bytediff.start())
 		.pipe(plugins.minifyCss())
 		.pipe(plugins.bytediff.stop())
-		.pipe(gulp.dest(pack.paths.dist.app.css.dir));
+		.pipe(gulp.dest(pack.paths.dist.app.css.dir))
+		.on('end', () => {
+			utils.onEnd('App SCSS compiled!')();
+			cb();
+		});
 }
 
 function appTest() {
@@ -102,5 +106,12 @@ gulp.task('test', appTest);
 
 gulp.task('watch:app', function () {
 	gulp.watch([pack.paths.src.app.scss], ['appSCSS']);
+	gulp.watch([pack.paths.src.app.js], ['appJS']);
 	return watchAppJS();
 });
+
+
+module.exports = {
+	appJS: appJS,
+	appSCSS: appSCSS
+};

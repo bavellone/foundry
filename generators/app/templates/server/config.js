@@ -6,13 +6,16 @@ var all = {
 			title: '<%= appName %>',
 			namespace: '<%= appNS %>'
 		},
+		interface: '127.0.0.1',
 		port: process.env.PORT || 80,
-		dataDir: './assets',
+		assets: './assets',
+		dataDir: './data',
 		connectionPool: 1000,
 		api: {
 			path: '/api'
 		},
 		auth: {
+			saltWorkFactor: 10,
 			jwt: {
 				secretKey: './config/token.key',
 				publicKey: './config/token.pub'
@@ -32,15 +35,18 @@ var all = {
 		}
 	},
 	production = {
+		dataDir: '/data',
 		db: process.env.DB_URI || 'http://db:7474',
 		port: process.env.PORT || 80
 	},
 	development = {
+		dataDir: './data',
 		db: process.env.DB_URI || 'http://127.0.0.1:7474',
 		port: process.env.PORT || 8888
 	},
 	testing = {
-		db: 'http://127.0.0.1:7474',
+		dataDir: './data',
+		db: 'http://127.0.0.1:17474',
 		port: process.env.PORT || randomInt(10000, 50000)
 	};
 

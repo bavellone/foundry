@@ -1,4 +1,4 @@
-FROM bavellone/nodejs
+FROM mhart/alpine-node
 
 RUN mkdir /data
 WORKDIR /app
@@ -11,15 +11,16 @@ ENV DEBUG app:*,lib:*
 
 # Install deps
 COPY package.json package.json
-RUN npm install 
+RUN npm install
 
 # Copy over app data
 COPY server server
+COPY public public
 COPY assets assets
 COPY common common
 COPY config config
 COPY .babelrc .babelrc
-COPY server.js server.js 
+COPY server.js server.js
 
 EXPOSE 80
-CMD npm start
+CMD ["node", "server.js"]

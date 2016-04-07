@@ -1,5 +1,5 @@
 /*eslint-env node */
-var notify = require('node-notifier').notify,
+var notify = require('node-notifier'),
 	_ = require('lodash'),
 	config = require('../server/config'),
 	chalk = require('chalk'),
@@ -10,7 +10,7 @@ var Utils = module.exports = {};
 
 
 Utils.notify = function (msg) {
-	notify({
+	notify.notify({
 		title: config.app.title || 'Notification',
 		message: msg
 	});
@@ -22,7 +22,7 @@ Utils.onEnd = function (msg, color) {
 			console.log(msg);
 		else
 			console.log(chalk[color](msg));
-		notify(msg);
+		Utils.notify(msg);
 	}
 };
 
@@ -34,7 +34,7 @@ Utils.onErr = function (err) {
 	}
 };
 
-Utils.spawnCmd = function(task) {
+Utils.spawnCmd = function (task) {
 	return q.promise(function (resolve, reject) {
 		spawn(task.cmd, task.args, _.merge({}, {
 			stdio: 'inherit',

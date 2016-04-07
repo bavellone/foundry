@@ -2,13 +2,14 @@
 'use strict';
 
 import React from 'react';
-import {Route, DefaultRoute} from 'react-router'
+import {Route, IndexRoute} from 'react-router'
+
 import App from './views/app';
 import Home from './views/home';
 
 const Routes = (
-	<Route handler={App} name='root' path='/'>
-		<DefaultRoute handler={Home} name={Home.route}/>
+	<Route component={App} path='/'>
+		<IndexRoute component={Home}/>
 	</Route>
 );
 

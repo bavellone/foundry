@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
+import q from 'q';
 
 // Define the API object
 let API = {},
@@ -13,47 +14,63 @@ let API = {},
  * observable streams from all of it's methods.
  * @class API_Endpoint
  */
-class API_Endpoint {
+export class API_Endpoint {
+	static token;
+
 	constructor(uri, routes) {
 		this.uri = uri;
 		this.routes = routes;
 		// Attach a handle for each route
 		_.map(routes, (route, key) => {
-			this[key] = (args = {}) => {
-				return API_Endpoint[route.method || 'GET']({url: `${config.path}/${this.uri}${args.id ? '/' + args.id : ''}`, ...args})
+			this[key] = (data = {}) => {
+				return API_Endpoint[route.method || 'GET']({
+					url: `${config.path}/${this.uri}${route.uri ? '/' + route.uri : ''}${data.id ? '/' + data.id : ''}`,
+					data
+				})
 			}
 		})
 	}
 
+	static request(args) {
+		return q($.ajax({
+			...args,
+			xhrFields: { // enable cookies
+				withCredentials: true
+			}
+		})).catch(err => {
+			throw err.responseJSON
+		})
+	}
+
 	static GET(args) {
-		return $.ajax({
+		return API_Endpoint.request({
 			...args,
 			method: 'GET'
 		})
 	}
 
 	static POST(args) {
-		return $.ajax({
+		return API_Endpoint.request({
 			...args,
 			method: 'POST',
 			data: JSON.stringify(args.data || {}),
 			contentType: 'application/json'
-		});
+		})
 	}
 
 	static PUT(args) {
-		return $.ajax({
+		return API_Endpoint.request({
 			...args,
 			method: 'PUT',
 			contentType: 'application/json'
-		});
+		})
 	}
 
 	static DELETE(args) {
-		return $.ajax({
+		return API_Endpoint.request({
 			...args,
 			method: 'DELETE'
-		});
+		})
 	}
 }
 
@@ -70,12 +87,4 @@ API.user = new API_Endpoint('user', {
 	}
 });
 
-
-export default function init(Backbone) {
-	Backbone.api = {};
-
-	// Initialize API routes
-	_.map(_.keys(API), stream => {
-		Backbone.api[stream] = API[stream];
-	});
-}
+export default API;

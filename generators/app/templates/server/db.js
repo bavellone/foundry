@@ -74,6 +74,39 @@ export default class DB {
 
 		return schema;
 	};
+
+	// static checkBootstrap = () =>
+	// 	DB.query().then(res => {
+	// 		if (res[0].count == 0)
+	// 			return DB.bootstrap();
+	// 		return q.reject();
+	// 	});
+
+	// static bootstrap = () =>
+	// dbg('Bootstrapping DB') ||
+	// DB.query().then(() => dbg(''))
+	// 	.then(() => DB.query(createVehicleDefnTree).then(() => dbg('')))
+	// 	.then(() => dbg('Bootstrapping complete!'));
+
+
+	static query = (queryStr, params = {}) =>
+		DB.connected.then(db =>
+			q.Promise((resolve, reject) => {
+				// dbg(`Running Query: ${queryStr}`);
+
+				db.query(queryStr, params, (err, results) => {
+					// dbg(`Got Response`);
+
+					if (err) {
+						dbg(`Query Error! ${err.toString()}`);
+						return reject(wrap(err));
+					}
+
+					resolve(results);
+				})
+			})
+		);
+	
 	static api = {
 		neo4j: function (schema) {
 			this.schema = schema;

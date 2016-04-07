@@ -2,7 +2,7 @@
 'use strict';
 
 import q from 'q';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import DB from '../../db';
 import UserSchema from '../../../common/models/user';

@@ -66,11 +66,9 @@ function bundleApp(b) {
 function appSCSS(cb) {
 	gulp.src(pack.paths.src.app.scss)
 		.pipe(plugins.concat(pack.paths.dist.app.css.file))
-		.pipe(plugins.sass())
-		.on('error', function (err) {
-			console.log(err.toString());
-			this.emit('end');
-		})
+		.pipe(plugins.sass({
+			outputStyle: (process.env.NODE_ENV == 'production' ? 'compressed' : 'expanded')
+		}).on('error', plugins.sass.logError))
 		.pipe(plugins.bytediff.start())
 		.pipe(plugins.minifyCss())
 		.pipe(plugins.bytediff.stop())

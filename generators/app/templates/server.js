@@ -18,13 +18,14 @@ fs.writeFile('server.pid', process.pid, (err) => {
  */
 
 var app = module.exports = require('./server/app.js')();
+var server = null;
 
 app.ready
 	.then(() => {
 		if (config.interface)
-			app.listen(config.port, config.interface, onListen);
+			server = app.listen(config.port, config.interface, onListen);
 		else
-			app.listen(config.port, onListen);
+			server = app.listen(config.port, onListen);
 	});
 
 /**
@@ -32,12 +33,12 @@ app.ready
  */
 
 function onListen() {
-	debug(`${chalk.green(config.app.title)} listening on port ${chalk.green(config.port)} in ${chalk.green(process.env.NODE_ENV || 'development')} mode`);
+	console.log(`${chalk.blue(config.app.title)} listening on port ${chalk.blue(config.port)} in ${chalk.blue(process.env.NODE_ENV || 'development')} mode`);
 }
 
 function shutdown() {
 	debug("Received kill signal, shutting down gracefully.");
-	app.close(function () {
+	server.close(function () {
 		debug("Closed out remaining connections.");
 		process.exit()
 	});
@@ -61,7 +62,7 @@ process.on('uncaughtException', function (err) {
 
 process.on('SIGINT', () => {
 	debug('Got SIGINT');
-	process.exit(0);
+	shutdown()
 });
 
 // SIGUSR2 is used by nodemon to restart the app, only bind in production

@@ -5,3 +5,8 @@ bower_components/
 !public/assets/index.html
 public/assets/
 public/semantic/
+assets/js
+assets/css
+assets/fonts
+assets/index.html
+server.pid

@@ -4,7 +4,7 @@
 import q from 'q';
 import bcrypt from 'bcryptjs';
 
-import DB from '../../db';
+import DB from '../../db/index';
 import UserSchema from '../../../common/models/user';
 
 let config = require('../../config');

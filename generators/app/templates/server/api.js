@@ -5,7 +5,7 @@ var config = require('./config'),
 	q = require('q'),
 	debug = require('debug')('app:api');
 
-var modules = require('./api/modules');
+var modules = require('./api');
 
 module.exports = function (app) {
 	var basePath = config.api.path + '/';

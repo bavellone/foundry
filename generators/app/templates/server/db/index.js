@@ -9,8 +9,8 @@ import seraphModel from 'seraph-model';
 import express from 'express';
 import request from 'request';
 
-import {ValidationError, wrap} from './libs/errors';
-import {ensureParamID} from './libs/utils';
+import {ValidationError, wrap} from './../libs/errors';
+import {ensureParamID} from './../libs/utils';
 
 /**
  *
@@ -36,8 +36,16 @@ export default class DB {
 		dbg(`Connecting to DB: ${ops.uri}`);
 		return DB.ping(ops.uri)
 			.then(
-				() => dbg(`DB connection established!`) || DB._connection.resolve(seraph(ops.uri)),
-				() => dbg(`DB connection failed!`) || DB._connection.reject()
+				() => {
+					dbg(`DB connection established!`);
+					DB._connection.resolve(seraph(ops.uri));
+					return DB.connected;
+				},
+				(err) => {
+					dbg(`DB connection failed!`);
+					DB._connection.reject(wrap(err));
+					return DB.connected;
+				}
 			)
 	};
 	/**
@@ -84,8 +92,8 @@ export default class DB {
 
 	// static bootstrap = () =>
 	// dbg('Bootstrapping DB') ||
-	// DB.query().then(() => dbg(''))
-	// 	.then(() => DB.query(createVehicleDefnTree).then(() => dbg('')))
+	// DB.query(createTimeTree).then(() => dbg('Created time tree'))
+	// 	.then(() => DB.query(createVehicleDefnTree).then(() => dbg('Created vehicle definition tree')))
 	// 	.then(() => dbg('Bootstrapping complete!'));
 
 

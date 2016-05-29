@@ -3,7 +3,7 @@
 
 import q from 'q';
 
-import DB from '../db';
+import DB from '../db/index';
 import User from '../api/user/model';
 import {sign, verify} from './jwt';
 import {AuthDenied, ValidationError, wrap} from './errors';

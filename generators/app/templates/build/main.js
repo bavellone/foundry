@@ -74,7 +74,7 @@ function deploy(cb) {
 			cb(err);
 		})
 		.on('exit', function () {
-			if (!err)
+			if (!error)
 				console.log(chalk.green(`Deployment of version ${pack.version} successful!`));
 			cb();
 		})

@@ -19,6 +19,9 @@ docker save $1/web:$2 | pv -cN gzip -s 500m | gzip | pv -cN xfer | ssh $1 "gunzi
 # Tag as latest
 ssh $1 "docker tag -f $1/web:$2 $1/web:latest"
 
+# Save logs of previous app
+ssh $1 "docker logs $1_web &>> ~/logs/$1.log"
+
 # Bring up new image
 echo "Launching new image..."
-ssh $1 "sink $1_web && docker run --name $1_web -d -p 127.0.0.1:8081:80 $1/web:latest"
+ssh $1 "sink $1_web && docker run --name $1_web --restart=always -d -p 127.0.0.1:8081:80 $1/web:latest"

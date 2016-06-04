@@ -63,16 +63,19 @@ function bump() {
 }
 
 function deploy(cb) {
-	console.log(chalk.green('Deploying version', pack.version));
-	spawn('./build/deploy.sh', [pack.namespace, pack.version, pack.dockerArgs], {
+	let error = false;
+	console.log(chalk.green('Deploying version', pack.version, 'on port', config.deployPort));
+	spawn('./build/deploy.sh', [pack.namespace, pack.version, config.deployPort], {
 		stdio: 'inherit'
 	})
 		.on('error', function (err) {
+			error = true;
 			console.error(err);
 			cb(err);
 		})
 		.on('exit', function () {
-			console.log(chalk.green(`Deployment of version ${pack.version} successful!`));
+			if (!err)
+				console.log(chalk.green(`Deployment of version ${pack.version} successful!`));
 			cb();
 		})
 }

@@ -2,11 +2,11 @@
 
 set -e
 
-if [ $# -lt 3 ]
+if [ $# -lt 2 ]
   then
-    echo "Usage: $0 host image name [args]" && exit
+    echo "Usage: $0 id port" && exit
 fi
 
 # Bring up new image
-echo "Launching $2 - $3 on host $1 with args '$4'..."
-ssh $1 "sink $3 && docker run --restart=always --name $3 -d $4 $2"
+echo "Launching $1/web as $1_web..."
+ssh $1 "sink $1_web && docker run --name $1_web --restart=always -d -p 127.0.0.1:$2:80 $1/web:latest"

@@ -8,6 +8,7 @@ var all = {
 		},
 		interface: '127.0.0.1',
 		port: process.env.PORT || 80,
+		deployPort: 8080,
 		assets: './assets',
 		dataDir: './data',
 		connectionPool: 1000,
@@ -36,6 +37,7 @@ var all = {
 	},
 	production = {
 		dataDir: '/data',
+		interface: '0.0.0.0',
 		db: process.env.DB_URI || 'http://db:7474',
 		port: process.env.PORT || 80
 	},

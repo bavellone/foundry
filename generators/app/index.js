@@ -63,5 +63,5 @@ Generator.prototype.install = {
 };
 
 Generator.prototype.end = function () {
-	console.log(chalk.green('Almost done! Run "npm build:dev" to complete installation'));
+	console.log(chalk.green('Almost done! Run "npm run build:dev" to complete installation'));
 };

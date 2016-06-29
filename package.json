@@ -1,6 +1,6 @@
 {
   "name": "generator-foundry",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "",
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
     "yeoman-generator": "^0.20.3"
   },
   "devDependencies": {
+    "babel-eslint": "^6.1.0",
     "chai": "^3.3.0",
     "chai-as-promised": "^5.1.0",
     "chai-fs": "^0.1.0",

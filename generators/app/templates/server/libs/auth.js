@@ -3,10 +3,9 @@
 
 import q from 'q';
 
-import DB from '../db/index';
 import User from '../api/user/model';
 import {sign, verify} from './jwt';
-import {AuthDenied, ValidationError, wrap} from './errors';
+import {AuthDenied} from './errors';
 
 
 /**
@@ -18,8 +17,12 @@ export function readToken(req, res, next) {
 			.done(token => {
 				req.token = token;
 				next();
-			}, () => next(new ValidationError('Invalid Token!')));
-	else 
+			}, () => {
+				dbg('Token rejected');
+				res.clearCookie('token');
+				res.redirect(303, '/login');
+			});
+	else
 		next();
 }
 
@@ -46,17 +49,28 @@ export function isAuth(req, res, next) {
 /**
  * Creates a new token
  */
-export function createToken(req, res, next) {
-	req.db.query('MATCH (user:User {email: {email}}) return user', {email: req.body.email}, (err, data) => {
-		if (err)
-			return next(wrap(err));
+export function createToken(data) {
+	// Expires in 1d
+	const expireDays = 1;
+	const expires = Math.floor(Date.now() / 1000) + (3600 * 24 * expireDays);
 
-		let user = new User(data[0] || {});
+	return sign({...data, expires});
+}
 
-		user.authenticate(req.body.password)
-			.done(
-				() => res.json({token: sign({roles: user.data.roles || ['user']})}),
-				() => next(new AuthDenied('Invalid Email/Password'))
-			)
-	});
+/**
+ * Login with the given email and password
+ */
+export function authenticate(email, password) {
+	return User.login(email, password)
+		.then(
+			createToken,
+			() => q.reject(new AuthDenied('Invalid Email/Password'))
+		)
+		.then(token => ({token}))
+}
+
+export function bootstrapAdminUser() {
+	return User.registered.then(user => {
+		return user.api.create(config.auth.admin)
+	})
 }

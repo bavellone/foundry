@@ -52,8 +52,6 @@
 		"request": "^2.69.0",
 		"rimraf": "^2.4.4",
 		"rx": "^4.0.0",
-		"seraph": "^0.13.3",
-		"seraph-model": "^0.7.5",
 		"validate.js": "^0.9.0"
 	},
 	"devDependencies": {

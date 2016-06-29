@@ -1,17 +1,14 @@
 /*eslint-env node*/
-// TODO - remove config dep, use app.locals.config to access config data
-var config = require('./config'),
-	_ = require('lodash'),
-	q = require('q'),
-	debug = require('debug')('app:api');
-
-var modules = require('./api');
+import Q from 'q';
+import _ from 'lodash';
+import modules from './api/';
+const	debug = require('debug')('app:api');
 
 module.exports = function (app) {
-	var basePath = config.api.path + '/';
+	var basePath = app.locals.config.api.path + '/';
 
-	if (config.enable.api)
-		return q.resolve().then(() => {
+	if (app.locals.config.enable.api)
+		return Q.resolve().then(() => {
 			app.locals.api = {};
 			app.locals.apiPath = basePath;
 
@@ -24,6 +21,6 @@ module.exports = function (app) {
 
 		}, err => debug(err));
 	else
-		return debug('API disabled!') || q.resolve();
+		return debug('API disabled!') || Q.resolve();
 };
 

@@ -4,7 +4,7 @@
 import path from 'path';
 import {globMap} from '../libs/utils';
 
-module.exports = globMap('./server/api/*/', function (paths) {
+export default globMap('./server/api/*/', function (paths) {
 	var app = require(paths.full + path.sep + 'app.js');
 
 	return {

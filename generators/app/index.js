@@ -28,6 +28,33 @@ Generator.prototype.prompting =  function () {
 		name: 'appDesc',
 		message: 'App description:',
 		default: ''
+	}, {
+		name: 'useDB',
+		type: 'confirm',
+		message: 'Setup DB access?',
+		default: true
+	},{
+		name: 'dbPackages',
+		type: 'checkbox',
+		message: 'Which DB backends are needed?',
+		choices: [{
+			name: 'Neo4j REST API',
+			value: 'seraph seraph-model',
+			default: true
+		}, {
+			name: 'Neo4j Bolt API',
+			value: 'neo4j-driver',
+			default: true
+		}, {
+			name: 'MongoDB',
+			value: 'mongoose',
+			default: true
+		}, {
+			name: 'MySQL',
+			value: 'sequelize',
+			default: true
+		}],
+		when: this.useDB
 	}];
 
 	// Collect all answers and save to the generator
@@ -35,6 +62,9 @@ Generator.prototype.prompting =  function () {
 		this.appName = props.appName;
 		this.appNS = props.appNS;
 		this.appDesc = props.appDesc;
+		this.useDB = props.useDB;
+		this.dbPackages = props.dbPackages;
+
 		done();
 	}.bind(this));
 };
@@ -58,8 +88,11 @@ Generator.prototype.initApp = function () {
 
 Generator.prototype.install = {
 	deps: function () {
-		this.installDependencies();
-	}
+		return this.installDependencies();
+	},
+	 extra: function() {
+		 return this.npmInstall(this.dbPackages, {save: true})
+	 }
 };
 
 Generator.prototype.end = function () {

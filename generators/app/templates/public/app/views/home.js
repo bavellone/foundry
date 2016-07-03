@@ -11,7 +11,7 @@ import MenuLink from '../components/menu/link';
 import ContentSegment from '../components/contentSegment';
 
 export default class Home extends React.Component {
-	static route = 'home';
+	static route = '/';
 	static linkText = 'Home';
 	static linkIcon = 'home';
 	
@@ -73,7 +73,7 @@ export default class Home extends React.Component {
 		_.reduce(this.props.routes, (links, route) => {
 			if (route.path != '/')
 				links.push({
-					to: route.path, text: route.component.linkText, icon: route.component.linkIcon
+					to: route.component.route, text: route.component.linkText, icon: route.component.linkIcon
 				});
 			return links;
 		}, []);

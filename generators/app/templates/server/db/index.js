@@ -19,7 +19,7 @@ const dbg = debug('app:db');
  */
 export default class DB {
 	_connection = Q.defer();
-	connected = DB._connection.promise;
+	connected = this._connection.promise;
 	models = [];
 	adapter = null;
 
@@ -28,20 +28,20 @@ export default class DB {
 	 * 
 	 * @param adapter
 	 */
-	constructor(adapter) {
+	constructor({adapter}) {
 		this.adapter = adapter;
 	}
 
 	/**
 	 * Attempt to establish a connection to the database
 	 */
-	connect = () => {
+	connect = (ops = {retryLimit: 3}) => {
 		// Skip connecting if we are already connected
 		if (Q.isFulfilled(this.connected))
 			return dbg('Already connected to DB') || this.connected;
 
-		dbg(`Connecting to DB: ${this.uri}`);
-		return this.adapter.ping(this.uri)
+		dbg(`Connecting to DB: ${this.adapter.uri}`);
+		return this.adapter.ping()
 			.then(
 				() => {
 					dbg(`DB connection established!`);
@@ -54,6 +54,17 @@ export default class DB {
 					return this.connected;
 				}
 			)
+			.catch(err => {
+				dbg(err);
+				if (ops.retryLimit > 0)
+					return Q.Promise(resolve => {
+						setTimeout(() => {
+							resolve(this.connect({retryLimit: --ops.retryLimit}))
+						}, 1000)
+					});
+				else 
+					return Q.reject(err);
+			})
 	};
 	
 	/**

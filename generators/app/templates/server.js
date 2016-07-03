@@ -6,6 +6,9 @@ var config = require('./server/config');
 var debug = require('debug')('app:server');
 var fs = require('fs');
 var util = require('util');
+var Q = require('q');
+
+Q.longStackSupport = (process.env.NODE_ENV == 'development');
 
 // Write PID to file
 fs.writeFile('server.pid', process.pid, (err) => {

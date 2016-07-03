@@ -16,10 +16,10 @@ var path = require('path'),
 
 import fs from 'fs';
 
+<% if (useDB) { %>
 import DB from './db';
-import Seraph from './db/seraph';
-
-import {readToken} from './libs/auth';
+import DBAdapter from './db/<%= DBAdapterPath %>';<% } if (useAuth) { %>
+import {readToken} from './libs/auth';<% } %>
 
 module.exports = function () {
 	dbgInit('Creating new app');
@@ -32,10 +32,10 @@ module.exports = function () {
 
 	// Use IP address from HAProxy X-Forwarded-For header
 	app.enable('trust proxy');
-
+	<% if (useDB) { %>
 	app.db = new DB({
-		adapter: new Seraph('localhost:7474')
-	});
+		adapter: new DBAdapter(config.db)
+	});<% } %>
 
 	http.globalAgent.maxSockets = config.connectionPool;
 
@@ -59,24 +59,25 @@ module.exports = function () {
 	});
 
 	app.use(cookieParser());
-	app.use(readToken);
-
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
+	<% if (useAuth) { %>
+	app.use(readToken);<% } %>
 
 	app.use((req, res, next) => {
 		dbgReq(`${req.ip}\t${req.method}\t${req.url}\t${req.xhr ? 'XHR' : ''}`);
 		next();
 	});
 
-	app.ready = require('./api.js')(app)
-		.then(() => dbgInit('API initialized!')) || DB.connect(config.db)
-		// Attach error handling
-		.then(
-			() => handleRequests(app),
-			err => dbgErr(err)
-		).then(() => dbgInit('Application initialized!'));
+	app.ready =	require('./api.js')(app)
+		.then(() => dbgInit('API initialized!'))
+		<% if (useDB) { %>
+		.then(app.db.connect())
+		.then(() => dbgInit('DB initialized!'))<% } %>
+		.then(() => handleRequests(app))
+		.then(() => dbgInit('Application initialization complete!'))
+		.catch(dbgErr);
 
 	return app;
 };

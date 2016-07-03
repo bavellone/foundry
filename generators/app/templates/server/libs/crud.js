@@ -10,9 +10,9 @@ import {ensureParamID} from './../libs/utils';
 
 let dbgCRUD = debug('app:db:crud');
 
-export default function(api) {
+export default function(modelAPI) {
 	let app = express.Router();
-	let crud = CRUDAPI(api);
+	let crud = CRUDAPI(modelAPI);
 
 	// Attach routes
 	app.get('/', crud.list);

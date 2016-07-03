@@ -1,5 +1,6 @@
 /*eslint-env node*/
 import express from 'express';
+import Q from 'q';
 
 import {createToken, readToken, isAuth} from '../../libs/auth';
 import {ensurePostData} from '../../libs/utils';
@@ -11,6 +12,6 @@ module.exports = function TokenModule() {
 	app.get('/', isAuth);
 	app.post('/', ensurePostData('email', 'password'), createToken);
 	
-	return app;
+	return Q.resolve(app);
 };
 

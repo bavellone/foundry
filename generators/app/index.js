@@ -29,21 +29,26 @@ Generator.prototype.prompting =  function () {
 		message: 'App description:',
 		default: ''
 	}, {
+		name: 'useAuth',
+		type: 'confirm',
+		message: 'Setup Authentication support?',
+		default: true
+	}, {
 		name: 'useDB',
 		type: 'confirm',
 		message: 'Setup DB access?',
 		default: true
 	},{
-		name: 'dbPackages',
-		type: 'checkbox',
-		message: 'Which DB backends are needed?',
+		name: 'dbBackend',
+		type: 'list',
+		message: 'Choose a DB Backend',
 		choices: [{
 			name: 'Neo4j REST API',
-			value: 'seraph seraph-model',
+			value: 'neo4jRest',
 			default: true
 		}, {
 			name: 'Neo4j Bolt API',
-			value: 'neo4j-driver',
+			value: 'neo4jBolt',
 			default: true
 		}, {
 			name: 'MongoDB',
@@ -51,7 +56,7 @@ Generator.prototype.prompting =  function () {
 			default: true
 		}, {
 			name: 'MySQL',
-			value: 'sequelize',
+			value: 'sql',
 			default: true
 		}],
 		when: this.useDB
@@ -59,11 +64,26 @@ Generator.prototype.prompting =  function () {
 
 	// Collect all answers and save to the generator
 	this.prompt(prompts, function (props) {
-		this.appName = props.appName;
-		this.appNS = props.appNS;
-		this.appDesc = props.appDesc;
-		this.useDB = props.useDB;
-		this.dbPackages = props.dbPackages;
+		_.merge(this, props);
+		
+		switch(props.dbBackend) {
+			case 'neo4jRest':
+				this.dbPackages = 'seraph seraph-model';
+				this.DBAdapterPath = 'seraph';
+				break;
+			case 'neo4jBolt':
+				this.dbPackages = 'neo4j-driver';
+				this.DBAdapterPath = 'bolt';
+				break;
+			case 'mongoose':
+				this.dbPackages = 'mongoose';
+				this.DBAdapterPath = 'mongo';
+				break;
+			case 'sql':
+				this.dbPackages = 'sequelize';
+				this.DBAdapterPath = 'sql';
+				break;
+		}
 
 		done();
 	}.bind(this));

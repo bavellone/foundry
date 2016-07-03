@@ -4,12 +4,11 @@
 import q from 'q';
 import bcrypt from 'bcryptjs';
 
-import DB from '../../db/';
 import UserSchema from '../../../common/models/user';
 
 let config = require('../../config');
 
-class User extends UserSchema {
+export default class User extends UserSchema {
 	constructor(data) {	super(data)	}
 	
 	static validationSettings = {
@@ -54,5 +53,3 @@ class User extends UserSchema {
 		});
 	
 }
-
-export default DB.registerSchema(User, 'User');

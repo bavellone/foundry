@@ -13,7 +13,7 @@ import {createTimeTree} from './bootstrapCQL';
 
 const dbg = debug('app:db:neo4j:seraph');
 
-export class Seraph {
+export default class Seraph {
 	uri = '';
 	
 	constructor(uri) {
@@ -29,23 +29,21 @@ export class Seraph {
 	 * @param uri
 	 * @returns {Promise}
 	 */
-	ping = (uri) => 
+	ping = () => 
 		Q.Promise((resolve, reject) => {
-			request(uri, (err, res, body) => {
+			request(this.uri, (err, res, body) => {
 				if (err || res.statusCode != 200)
 					return reject(err ? err.toString() : res.statusCode);
 				resolve()
 			})
 		});
 	
-	registerSchema = (db, schema, label) => 
+	registerSchema = (db, schema, label) =>
+		dbg(`Registering ${schema.type} schema`) ||
 		Q.Promise(resolve => {
-			// Create seraph model instance and attach to schema
-			let model = seraphModel(db, label);
-			model.DB = Seraph;
-			model.type = schema.type;
-
-			resolve(model);
+			resolve(
+				this.createModel(seraphModel(db, label), schema)
+			);
 		});
 
 	bootstrap = () =>
@@ -64,27 +62,27 @@ export class Seraph {
 	query = (db, queryStr, params = {}) =>
 		Q.ninvoke(db, 'query', queryStr, params).catch(err => dbg(`Query Error! ${err.toString()}`) || wrap(err));
 
-	static model = (schema, ops) => {
-		return new SeraphModel(schema, ops)
+	createModel = (model, schema) => {
+		return new SeraphModel(model, schema)
 	}
 }
 
 class SeraphModel extends Model {
 	list = () =>
 		Q.ninvoke(this.model, 'findAll')
-			.then(models => models.map(model => this.toJSON(model, this.blacklist)));
+			.then(models => models.map(model => this.schema.toJSON(model, this.schema.blacklist)));
 
 	create = (data) =>
-		new this.schema(data).validate(this.validationSettings.create)
+		new this.schema(data).validate(this.schema.validationSettings.create)
 			.then(
 				() => Q.ninvoke(this.model, 'save', data),
 				err => Q.reject(new ValidationError(err))
 			)
-			.then(model => this.toJSON(model, this.blacklist));
+			.then(model => this.schema.toJSON(model, this.schema.blacklist));
 
 	read = (id, ops = {raw: false}) =>
 		Q.ninvoke(this.model, 'read', id)
-			.then(model => ops.raw ? model : this.toJSON(model, this.blacklist));
+			.then(model => ops.raw ? model : this.schema.toJSON(model, this.schema.blacklist));
 
 	update = (id, data) =>
 		this.read(id, {raw: true})
@@ -96,12 +94,5 @@ class SeraphModel extends Model {
 		Q.ninvoke(this.model, 'delete', id);
 
 	destroyAll = () =>
-		Q.Promise((resolve, reject) => {
-			DB.connected.then(db =>
-				db.queryRaw('MATCH (n) DETACH DELETE n', {}, err => {
-					if (err)
-						return reject(err);
-					resolve();
-				}))
-		});
+		Q.ninvoke(this.model, 'query', `MATCH (n:${this.schema.type}) DETACH DELETE n`);
 }

@@ -60,7 +60,7 @@ export default class Seraph {
 		);
 
 	query = (db, queryStr, params = {}) =>
-		Q.ninvoke(db, 'query', queryStr, params).catch(err => dbg(`Query Error! ${err.toString()}`) || wrap(err));
+		Q.ninvoke(db, 'query', queryStr, params).catch(err => dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err)));
 
 	createModel = (model, schema) => {
 		return new SeraphModel(model, schema)

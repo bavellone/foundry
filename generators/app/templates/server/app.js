@@ -15,7 +15,8 @@ var path = require('path'),
 	errors = require('./libs/errors');
 
 import fs from 'fs';
-
+import Q from 'q';
+z
 <% if (useDB) { %>
 import DB from './db';
 import DBAdapter from './db/<%= DBAdapterPath %>';<% } if (useAuth) { %>
@@ -70,11 +71,11 @@ module.exports = function () {
 		next();
 	});
 
-	app.ready =	require('./api.js')(app)
-		.then(() => dbgInit('API initialized!'))
-		<% if (useDB) { %>
+	app.ready =	Q.resolve()<% if (useDB) { %>
 		.then(app.db.connect())
 		.then(() => dbgInit('DB initialized!'))<% } %>
+		.then(() => require('./api.js')(app))
+		.then(() => dbgInit('API initialized!'))
 		.then(() => handleRequests(app))
 		.then(() => dbgInit('Application initialization complete!'))
 		.catch(dbgErr);

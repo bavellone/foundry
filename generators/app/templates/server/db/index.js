@@ -35,7 +35,7 @@ export default class DB {
 	/**
 	 * Attempt to establish a connection to the database
 	 */
-	connect = (ops = {retryLimit: 3}) => {
+	connect = (ops = {poll: 15}) => {
 		// Skip connecting if we are already connected
 		if (Q.isFulfilled(this.connected))
 			return dbg('Already connected to DB') || this.connected;
@@ -56,16 +56,19 @@ export default class DB {
 			)
 			.catch(err => {
 				dbg(err);
-				if (ops.retryLimit > 0)
-					return Q.Promise(resolve => {
-						setTimeout(() => {
-							resolve(this.connect({retryLimit: --ops.retryLimit}))
-						}, 1000)
-					});
-				else 
-					return Q.reject(err);
-			})
+				dbg(`Retrying in ${ops.poll}s`);
+				return Q.Promise(resolve => {
+					setTimeout(() => {
+						resolve(this.connect(ops))
+					}, ops.poll * 1000);
+				});
+			});
 	};
+	
+	disconnect = () =>
+		this.connected.then(db =>
+			this.adapter.disconnect(db)
+		);
 	
 	/**
 	 * Provide a Schema object and a label to identify the model
@@ -76,7 +79,6 @@ export default class DB {
 	 */
 	registerSchema = (schema, label) => 
 		this.connected.then(db => {
-			dbg(`Registering new Schema: ${label}`);
 			return this.adapter.registerSchema(db, schema, label)
 		}).then(model => {
 			this.models.push({model,schema,label});
@@ -87,7 +89,6 @@ export default class DB {
 	 * Runs the DB Bootstrap code if necessary
 	 */
 	bootstrap = () =>
-		dbg('Checking if DB Bootstrap is needed') ||
 		this.adapter.bootstrap();
 
 	/**

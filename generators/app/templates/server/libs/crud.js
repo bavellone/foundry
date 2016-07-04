@@ -1,283 +1,64 @@
 /*eslint-env node*/
 /**
- * This module defines a set of common CRUD routes that operate on Mongoose models
+ * This module defines a set of common CRUD routes 
  */
 	
-import errorHandler from './errors';
-import _ from 'lodash';
 import express from 'express';
-import _debug from 'debug';
-import mongoose from 'mongoose';
+import debug from 'debug';
+import {wrap, return404} from './../libs/errors';
+import {ensureParamID} from './../libs/utils';
 
-let debug = _debug('app:lib'),
-	methods = ['list', 'read', 'create', 'update', 'destroy', 'emptyDB'];
+let dbgCRUD = debug('app:db:crud');
 
-/**
- * Export a function to attach CRUD endpoints to the given model.
- *
- * @param model
- * @param middleware
- * @param hooks
- * @returns {*}
- */
-export default function (model, middleware, hooks) {
-	if (arguments.length == 2)
-		hooks = middleware;
-
-	// Create the micro-app
+export default function(modelAPI) {
 	let app = express.Router();
+	let crud = CRUDAPI(modelAPI);
 
-	// Attach middleware
-	if (_.isArray(middleware))
-		_.map(middleware, fn => app.use(fn));
-	else if (_.isFunction(middleware))
-		app.use(middleware);
+	// Attach routes
+	app.get('/', crud.list);
+	app.post('/', crud.create);
+	app.delete('/', crud.destroyAll);
+	app.get('/:id', ensureParamID(), crud.read);
+	app.put('/:id', ensureParamID(), crud.update);
+	app.delete('/:id', ensureParamID(), crud.destroy);
 
-	// Attach the CRUD interface
-	return CRUD(app, model, buildHookMap(hooks));
-};
+	app.use((req, res, next) =>
+		dbgCRUD(`404`) || return404(req, res)
+	);
 
-/**
- *  Returns an object with a REST-ful API attached
- *
- * @param app
- * @param model
- * @param hooks
- * @returns {{list: Function, read: Function, create: Function, update: Function, destroy: Function}}
- */
-function CRUD(app, model, hooks) {
-	app.route('/')
-		.get(list(model, hooks.list))
-		.post(create(model, hooks.create))
-		.delete(emptyDB(model, hooks.emptyDB));
-	
-	app.route('/:id')
-		.get(read(model, hooks.read))
-		.post(update(model, hooks.update))
-		.delete(destroy(model, hooks.destroy));
-	
 	return app;
 }
 
-/**
- * Returns an object with middleware hooks for each CRUD endpoint.
- *
- * @param hooks
- * @returns {*}
- */
-function buildHookMap(hooks) {
-	return _.reduce(_methods, (map, action) => {
-		if (hooks && _.isPlainObject(hooks[action])) {
-			map[action] = _.merge({
-				pre: [],
-				post: []
-			}, hooks[action])
-		}
-		else if (hooks && _.isFunction(hooks[action])) {
-			map[action] = {
-				pre: hooks[action],
-				post: []
-			}
-		}
-		else
-			map[action] = {
-				pre: [],
-				post: []
-			};
-		return map;
-	}, {});
-}
+function CRUDAPI(api) {
+	return {
+		list: (req, res, next) =>
+		dbgCRUD(`listing ${api.schema.type}s`) ||
+		api.list()
+			.done(::res.json, err => next(wrap(err))),
 
-/**
- * Returns a function that will respond to requests with a list of all the documents
- * defined by the given model.
- *
- * @param model
- * @returns {Function}
- * @param hook
- */
-function list(model, hook) {
-	
-	return function list(req, res, next) {
-		debug("Got list request", req.method, req.baseUrl + req.path);
-		hook.pre(req, res, function (err, ops) {
-			if (err)
-				return next(err);
+		create: (req, res, next) =>
+		dbgCRUD(`creating ${api.schema.type}`) ||
+		api.create(req.body)
+			.done(::res.json, err => next(wrap(err))),
 
-			model.findAll(ops || {}, errorHandler.saveCB(next, (docs) => {
-				hook.post(docs, req, res, (err) => {
-					if (err)
-						return next(err);
+		read: (req, res, next) =>
+		dbgCRUD(`reading ${api.schema.type}:${req.params.id}`) ||
+		api.read(req.params.id)
+			.done(::res.json, err => next(wrap(err))),
 
-					res.json(_.map(docs, (doc) => {
-						return ModelToObj(doc);
-					}))
-				})
-			}));
-			
-		})
+		update: (req, res, next) =>
+		dbgCRUD(`updating ${api.schema.type}:${req.params.id}`) ||
+		api.update(req.params.id, req.body)
+			.done(::res.json, err => next(wrap(err))),
+
+		destroy: (req, res, next) =>
+		dbgCRUD(`deleting ${api.schema.type}:${req.params.id}`) ||
+		api.destroy(req.params.id)
+			.done(() => res.status(200).send(), err => next(wrap(err))),
+
+		destroyAll: (req, res, next) =>
+		dbgCRUD(`deleting all ${api.schema.type}s`) ||
+		api.destroyAll()
+			.done(() => res.status(200).send(), err => next(wrap(err)))
 	}
-	
-}
-
-/**
- * Returns a function that will respond to requests with a single document identified by
- * the _id parameter
- *
- * @param model
- * @returns {Function}
- * @param hook
- */
-function read(model, hook) {
-	
-	return function read(req, res, next) {
-		debug("Got read request", req.method, req.baseUrl + req.path);
-		hook.pre(req, res, function (err) {
-			if (err)
-				return next(err);
-
-			model.read(req.params.id, errorHandler.saveCB(next, function (doc) {
-				hook.post(doc, req, res, function (err) {
-					if (err)
-						return next(err);
-
-					res.json(ModelToObj(doc));
-				})
-			}))
-			
-		})
-	}
-	
-}
-
-/**
- * Returns a function which creates the given model from POST data in the request.
- *
- * @param model
- * @returns {Function}
- * @param hook
- */
-function create(model, hook) {
-	return function create(req, res, next) {
-		debug("Got create request", req.method, req.baseUrl + req.path);
-		hook.pre(req, res, function (err) {
-			if (err)
-				return next(err);
-
-			// Save the new model
-			model.save(req.body, errorHandler.saveCB(next, function (doc) {
-				hook.post(doc, req, res, function (err) {
-					if (err)
-						return next(err);
-
-					res.json(ModelToObj(doc));
-				})
-			}))
-		})
-	}
-}
-
-/**
- * Returns a function which updates a document with the POST data in the request. The
- * document's _id must be sent along with the POST data or the request will be rejected.
- *
- * @param model
- * @param hook
- */
-function update(model, hook) {
-	return function update(req, res, next) {
-		debug("Got update request", req.method, req.baseUrl + req.path);
-		hook.pre(req, res, function (err) {
-			if (err)
-				return next(err);
-
-			model.read(req.params.id, errorHandler.saveCB(res, function (doc) {
-				// Update the model
-				_.merge(doc, req.body, function (a, b) {
-					if ((_.isArray(a) && _.isArray(b)) || (_.isPlainObject(a) && _.isPlainObject(b)))
-						return b;
-				});
-
-				// Validate and save the new model data
-				model.save(doc, errorHandler.saveCB(next, function () {
-					hook.post(doc, req, res, function (err) {
-						if (err)
-							return next(err);
-
-						res.json(ModelToObj(doc));
-					})
-				}))
-				
-			}))
-		})
-	}
-}
-
-/**
- * Returns a function which removes a document given by the _id POST parameter.
- *
- * @param model
- * @param hook
- */
-function destroy(model, hook) {
-	return function destroy(req, res, next) {
-		debug("Got destroy request", req.method, req.baseUrl + req.path);
-		hook.pre(req, res, function (err) {
-			if (err)
-				return next(err);
-
-			model.findById(req.params.id, errorHandler.saveCB(next, function (doc) {
-				model.remove({_id: req.params.id}, errorHandler.saveCB(next, function () {
-
-					hook.post(doc, req, res, function (err) {
-						if (err)
-							return next(err);
-
-						res.sendStatus(200);
-					})
-				}))
-			}))
-		})
-	}
-}
-
-/**
- * Returns a function that empties a collection
- *
- * @param model
- * @param hook
- * @returns {Function}
- */
-function emptyDB(model, hook) {
-	return function (req, res, next) {
-		debug("Got emptyDB request", req.method, req.baseUrl + req.path);
-		hook.pre(req, res, function (err) {
-			if (err)
-				return next(err);
-
-			mongoose.connection.db.dropCollection(model.collection.name, function (err) {
-				if (err)
-					return next(err);
-
-				hook.post(req, res, function (err) {
-					if (err)
-						return next(err);
-
-					res.sendStatus(200);
-				})
-			})
-		})
-	}
-}
-
-/**
- * Turns the given model into a plain object. Will call the exportData() fn on
- * the model if the fn exists.
- *
- * @param model
- * @returns {Array|Object|*}
- * @constructor
- */
-function ModelToObj(model) {
-	return model;
 }

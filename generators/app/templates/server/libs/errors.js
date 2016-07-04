@@ -91,6 +91,12 @@ module.exports.errors = {
 	}
 };
 
+module.exports.return404 = function (req, res) {
+	if (!res.headersSent)
+		res.sendStatus(404).end();
+	else
+		res.end();
+};
 
 module.exports.catchAll = function catchAll(err, req, res, next) {
 	if (err instanceof BaseError) {
@@ -103,15 +109,19 @@ module.exports.catchAll = function catchAll(err, req, res, next) {
 		debug(`${err.code}\n${err.stackTrace}`);
 	}
 
-	res.status(err.code || 500);
+	if (!res.headersSent) {
+		res.status(err.code || 500);
 
-	var whitelist = ['code', 'name', 'desc', 'data'];
+		var whitelist = ['code', 'name', 'desc', 'data'];
 
-	res.json(_.reduce(err, function (response, val, key) {
-		if (val && _.includes(whitelist, key))
-			response[key] = val;
-		return response;
-	}, {}))
+		res.json(_.reduce(err, function (response, val, key) {
+			if (val && _.includes(whitelist, key))
+				response[key] = val;
+			return response;
+		}, {}))
+	}
+	else
+		res.end();
 };
 
 

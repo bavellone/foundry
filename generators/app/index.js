@@ -28,13 +28,63 @@ Generator.prototype.prompting =  function () {
 		name: 'appDesc',
 		message: 'App description:',
 		default: ''
+	}, {
+		name: 'useAuth',
+		type: 'confirm',
+		message: 'Setup Authentication support?',
+		default: true
+	}, {
+		name: 'useDB',
+		type: 'confirm',
+		message: 'Setup DB access?',
+		default: true
+	},{
+		name: 'dbBackend',
+		type: 'list',
+		message: 'Choose a DB Backend',
+		choices: [{
+			name: 'Neo4j REST API',
+			value: 'neo4jRest',
+			default: true
+		}, {
+			name: 'Neo4j Bolt API',
+			value: 'neo4jBolt',
+			default: true
+		}, {
+			name: 'MongoDB',
+			value: 'mongoose',
+			default: true
+		}, {
+			name: 'MySQL',
+			value: 'sql',
+			default: true
+		}],
+		when: this.useDB
 	}];
 
 	// Collect all answers and save to the generator
 	this.prompt(prompts, function (props) {
-		this.appName = props.appName;
-		this.appNS = props.appNS;
-		this.appDesc = props.appDesc;
+		_.merge(this, props);
+		
+		switch(props.dbBackend) {
+			case 'neo4jRest':
+				this.dbPackages = 'seraph seraph-model';
+				this.DBAdapterPath = 'seraph';
+				break;
+			case 'neo4jBolt':
+				this.dbPackages = 'neo4j-driver';
+				this.DBAdapterPath = 'bolt';
+				break;
+			case 'mongoose':
+				this.dbPackages = 'mongoose';
+				this.DBAdapterPath = 'mongo';
+				break;
+			case 'sql':
+				this.dbPackages = 'sequelize';
+				this.DBAdapterPath = 'sql';
+				break;
+		}
+
 		done();
 	}.bind(this));
 };
@@ -58,8 +108,11 @@ Generator.prototype.initApp = function () {
 
 Generator.prototype.install = {
 	deps: function () {
-		this.installDependencies();
-	}
+		return this.installDependencies();
+	},
+	 extra: function() {
+		 return this.npmInstall(this.dbPackages, {save: true})
+	 }
 };
 
 Generator.prototype.end = function () {

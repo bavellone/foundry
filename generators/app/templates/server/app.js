@@ -14,36 +14,37 @@ var path = require('path'),
 	dbgReq = debug('app:request'),
 	errors = require('./libs/errors');
 
+import fs from 'fs';
+import Q from 'q';
+
+<% if (useDB) { %>
 import DB from './db';
-import {readToken} from './libs/auth';
+import DBAdapter from './db/<%= DBAdapterPath %>';<% } if (useAuth) { %>
+import {readToken} from './libs/auth';<% } %>
 
 module.exports = function () {
 	dbgInit('Creating new app');
 	var app = express();
+	
+	app.locals.config = config;
 
 	// Get rid of express header
 	app.disable('x-powered-by');
 
 	// Use IP address from HAProxy X-Forwarded-For header
 	app.enable('trust proxy');
-
-	app.db = DB;
-	app.use((req, res, next) => {
-		req.db = DB;
-		next();
-	});
+	<% if (useDB) { %>
+	app.db = new DB({
+		adapter: new DBAdapter(config.db)
+	});<% } %>
 
 	http.globalAgent.maxSockets = config.connectionPool;
 
 	// Serve app shell when root is requested
 	app.get('/', (req, res) => {
 		res.header('X-Version', pack.version);
-		res.sendFile('/index.html', {root: config.assets}, err => {
-			if (err) {
-				console.log(err);
-				res.status(err.status).end();
-			}
-		});
+		fs.createReadStream(path.resolve(path.join(config.assets,'/index.html')))
+			.pipe(res)
 	});
 	app.use('/assets', express.static(path.resolve(config.assets)));
 	app.use('/assets', express.static(path.resolve(config.dataDir)));
@@ -59,24 +60,25 @@ module.exports = function () {
 	});
 
 	app.use(cookieParser());
-	app.use(readToken);
-
 	app.use(bodyParser.urlencoded({
 		extended: true
 	}));
+	<% if (useAuth) { %>
+	app.use(readToken);<% } %>
 
 	app.use((req, res, next) => {
 		dbgReq(`${req.ip}\t${req.method}\t${req.url}\t${req.xhr ? 'XHR' : ''}`);
 		next();
 	});
 
-	app.ready = require('./api.js')(app)
+	app.ready =	Q.resolve()<% if (useDB) { %>
+		.then(app.db.connect())
+		.then(() => dbgInit('DB initialized!'))<% } %>
+		.then(() => require('./api.js')(app))
 		.then(() => dbgInit('API initialized!'))
-		// Attach error handling
-		.then(
-			() => handleRequests(app),
-			err => dbgErr(err)
-		).then(() => dbgInit('Application initialized!'));
+		.then(() => handleRequests(app))
+		.then(() => dbgInit('Application initialization complete!'))
+		.catch(dbgErr);
 
 	return app;
 };

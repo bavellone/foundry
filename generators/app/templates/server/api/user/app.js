@@ -1,8 +1,9 @@
 /*eslint-env node*/
-import DB from '../../db/index';
+import CRUD from '../../libs/crud';
 import User from './model';
 
-module.exports = function UserModule() {
-	// Return the CRUD endpoint
-	return DB.CRUDEndpoint(User);
+module.exports = function UserModule(app) {
+	return app.db
+		.registerSchema(User, 'User')
+		.then(CRUD)
 };

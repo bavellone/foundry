@@ -1,0 +1,37 @@
+{
+  "extends": "eslint:recommended",
+  "ecmaFeatures": {
+    "modules": true,
+    "classes": true,
+    "defaultParams": true,
+    "destructuring": true,
+    "spread": true,
+    "restParams": true,
+    "generators": true,
+    "templateStrings": true,
+    "arrowFunctions": true,
+    "objectLiteralComputedProperties": true,
+    "objectLiteralDuplicateProperties": true,
+    "objectLiteralShorthandMethods": true,
+    "objectLiteralShorthandProperties": true,
+    "experimentalObjectRestSpread": true,
+    "blockBindings": true
+  },
+  "globals": {
+    "_": true,
+    "document": true,
+    "describe": true,
+    "it": true,
+    "before": true,
+    "after": true,
+    "expect": true
+  },
+  "rules": {
+    "quotes": [0, "single"],
+    "no-underscore-dangle": 0,
+    "no-console": 0,
+    "strict": 0,
+    "no-use-before-define": 0,
+    "curly": [2, "multi"]
+  }
+}

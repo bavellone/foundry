@@ -4,11 +4,9 @@
 import path from 'path';
 import {globMap} from '../libs/utils';
 
-module.exports = globMap('./server/api/*/', function (paths) {
-	var app = require(paths.full + path.sep + 'app.js');
-
+export default globMap('./server/api/*/', function (paths) {
 	return {
 		name: paths.file, // Name of module
-		app // Express Router object
+		app: paths.full + path.sep + 'app.js' // Path to app
 	};
 });

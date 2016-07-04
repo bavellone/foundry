@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import glob from 'glob';
 import path from 'path';
-import config from '../config';
 import {MissingParameterError, MissingIDError} from './errors';
 
 
@@ -53,9 +52,8 @@ export function ensureParamData(...data) {
 
 export function ensureParamID() {
 	return (req, res, next) => {
-		if (!_.isFinite(Number(req.params.id)))
+		if (!req.params.id)
 			return next(new MissingIDError());
-		req.params.id = Number(req.params.id);
 		next();
 	}
 }

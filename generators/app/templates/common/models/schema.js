@@ -13,17 +13,21 @@ export default class Schema {
 	constructor(data = {}) {
 		this.data = data;
 	}
-
+	data = {};
 	constraints = {};
 	blacklist = [];
 
-	validate(ops = {}) {
+	static validate(data = {}, constraints = {}, ops = {}) {
 		let err;
 
-		if (err = _validate(this.data, this.constraints, ops))
+		if (err = _validate(data, constraints, ops))
 			return q.reject(err);
 		else
-			return q.resolve(this.data);
+			return q.resolve(data);
+	}
+
+	validate(ops = {}) {
+		return Schema.validate(this.data, this.constraints, ops)
 	}
 
 	static toJSON(data, blacklist) {

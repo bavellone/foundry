@@ -4,12 +4,11 @@
 import q from 'q';
 import bcrypt from 'bcryptjs';
 
-import DB from '../../db/index';
 import UserSchema from '../../../common/models/user';
 
 let config = require('../../config');
 
-class User extends UserSchema {
+export default class User extends UserSchema {
 	constructor(data) {	super(data)	}
 	
 	static validationSettings = {
@@ -20,8 +19,8 @@ class User extends UserSchema {
 
 	static blacklist = ['password'];
 	
-	validate(ops = {hashPass: false}) {
-		return super.validate(ops)
+	static validate(ops = {hashPass: false}) {
+		return UserSchema.validate(ops)
 			.then((data) => { // Hash password
 				if (!ops.hashPass)
 					return data;
@@ -33,11 +32,12 @@ class User extends UserSchema {
 
 						// hash the password using our new salt
 						bcrypt.hash(this.data.password, salt, (err, hash) => {
-							if (err) return reject(err);
+							if (err) 
+								return reject(err);
 
 							// override the cleartext password with the hashed one
 							this.data.password = hash;
-							return resolve(this.data);
+							resolve(this.data);
 						})
 					})
 				})
@@ -53,5 +53,3 @@ class User extends UserSchema {
 		});
 	
 }
-
-export default DB.registerSchema(User, 'User');

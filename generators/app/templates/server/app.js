@@ -16,7 +16,7 @@ var path = require('path'),
 
 import fs from 'fs';
 import Q from 'q';
-z
+
 <% if (useDB) { %>
 import DB from './db';
 import DBAdapter from './db/<%= DBAdapterPath %>';<% } if (useAuth) { %>

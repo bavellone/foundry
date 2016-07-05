@@ -38,17 +38,17 @@ var all = {
 	production = {
 		dataDir: '/data',
 		interface: '0.0.0.0',
-		db: process.env.DB_URI || 'http://db:7474',
+		db: process.env.DB_URI || '<%= dbProto %>://db:<%= dbPort %>',
 		port: process.env.PORT || 80
 	},
 	development = {
 		dataDir: './data',
-		db: process.env.DB_URI || 'http://127.0.0.1:7474',
+		db: process.env.DB_URI || '<%= dbProto %>://localhost:<%= dbPort %>',
 		port: process.env.PORT || 8888
 	},
 	testing = {
 		dataDir: './data',
-		db: 'http://127.0.0.1:17474',
+		db: '<%= dbProto %>://localhost:1<%= dbPort %>',
 		port: process.env.PORT || randomInt(10000, 50000)
 	};
 

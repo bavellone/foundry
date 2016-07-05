@@ -11,11 +11,11 @@ import _validate from 'validate.js';
 
 export default class Schema {
 	constructor(data = {}) {
-		this.data = data;
+		this.data = Schema.sanitize(data, this.constructor.constraints);
 	}
 	data = {};
-	constraints = {};
-	blacklist = [];
+	static constraints = {};
+	static blacklist = [];
 
 	static validate(data = {}, constraints = {}, ops = {}) {
 		let err;
@@ -25,16 +25,21 @@ export default class Schema {
 		else
 			return q.resolve(data);
 	}
-
 	validate(ops = {}) {
-		return Schema.validate(this.data, this.constraints, ops)
+		return Schema.validate(this.data, this.constructor.constraints, ops);
+	}
+	validateCreate(ops) {
+		return this.validate(this.constructor.validationSettings.create)
 	}
 
 	static toJSON(data, blacklist) {
-		return _.omit(data, blacklist)
+		return _.omit(data, blacklist);
+	}
+	toJSON() {
+		return Schema.toJSON(this.data, this.contructor.blacklist);
 	}
 
-	toJSON() {
-		return Schema.toJSON(this.data, this.blacklist)
+	static sanitize(data, constraints) {
+		return ({..._.pick(data, _.keys(constraints))})
 	}
 }

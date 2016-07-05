@@ -33,7 +33,7 @@ validate.validators.arrayLen = function (value, options) {
 validate.validators.arrayInclusion = function (value, options) {
 	if (!_.every(value, val => _.includes(options, val)))
 		return `must be one of: ${options.join(', ')}`
-}
+};
 
 validate.validators.type = function (value, type) {
 	if (!(value.constructor === type) && !(value instanceof type))

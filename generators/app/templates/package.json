@@ -145,7 +145,8 @@
 				"css": [
 					"bower_components/semantic/dist/semantic.css"
 				],
-				"fonts": "bower_components/semantic/dist/themes/default/assets/fonts"
+				"fonts": "bower_components/semantic/dist/themes/default/assets/fonts",
+				"flags": "bower_components/semantic/dist/themes/default/assets/images/flags.png"
 			}
 		},
 		"dist": {

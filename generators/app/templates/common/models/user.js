@@ -10,7 +10,7 @@ export default class UserSchema extends Schema {
 	}
 
 	static type = 'User';
-	constraints = {
+	static constraints = {
 		email: {
 			presence: true,
 			email: {
@@ -24,7 +24,16 @@ export default class UserSchema extends Schema {
 			}
 		},
 		roles: {
-			inclusion: ['user', 'admin']
+			inclusion: ['admin']
+		},
+		img: {
+			presence: true
+		},
+		name: {
+			presence: true
+		},
+		nat: {
+			presence: true
 		}
 	};
 }

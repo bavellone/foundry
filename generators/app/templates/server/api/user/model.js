@@ -9,8 +9,6 @@ import UserSchema from '../../../common/models/user';
 let config = require('../../config');
 
 export default class User extends UserSchema {
-	constructor(data) {	super(data)	}
-	
 	static validationSettings = {
 		create: {
 			hashPass: true
@@ -18,32 +16,32 @@ export default class User extends UserSchema {
 	};
 
 	static blacklist = ['password'];
-	
-	static validate(ops = {hashPass: false}) {
-		return UserSchema.validate(ops)
-			.then((data) => { // Hash password
+
+	validate(ops = {hashPass: false}) {
+		return super.validate(ops)
+			.then(data => { // Hash password
 				if (!ops.hashPass)
 					return data;
-				
+
 				// generate a salt
 				return q.Promise((resolve, reject) => {
 					bcrypt.genSalt(config.auth.saltWorkFactor, (err, salt) => {
 						if (err) return reject(err);
 
 						// hash the password using our new salt
-						bcrypt.hash(this.data.password, salt, (err, hash) => {
-							if (err) 
+						bcrypt.hash(data.password, salt, (err, hash) => {
+							if (err)
 								return reject(err);
 
 							// override the cleartext password with the hashed one
-							this.data.password = hash;
-							resolve(this.data);
+							data.password = hash;
+							resolve(data);
 						})
 					})
 				})
 			})
 	}
-	
+
 	authenticate = (password) =>
 		q.promise((resolve, reject) => {
 			bcrypt.compare(password, this.data.password || '', function (err, auth) {
@@ -51,5 +49,5 @@ export default class User extends UserSchema {
 				return resolve(auth);
 			});
 		});
-	
+
 }

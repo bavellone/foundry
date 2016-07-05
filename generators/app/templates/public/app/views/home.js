@@ -5,6 +5,8 @@ import React from 'react';
 import {Link} from 'react-router';
 import _ from 'lodash';
 import classnames from 'classnames';
+import axios from 'axios';
+import moment from 'moment';
 
 import SidebarMenu from '../components/menu/sidebar';
 import MenuLink from '../components/menu/link';
@@ -14,7 +16,7 @@ export default class Home extends React.Component {
 	static route = '/';
 	static linkText = 'Home';
 	static linkIcon = 'home';
-	
+
 	static defaultProps = {
 		menuAnimationDelay: 500
 	};
@@ -33,12 +35,50 @@ export default class Home extends React.Component {
 			},
 			delayAnimation: false,
 			delayTimeout: 0
-		}
+		},
+		users: []
 	};
 
 	componentDidMount() {
-
+		this.getUsers();
 	}
+
+	getUsers = () =>
+		axios.get('/api/user')
+			.then(res => res.data)
+			.then(users => {
+				this.setState({...this.state, users})
+			});
+
+	createUser = () =>
+		this.getUserData()
+			.then(data => axios.post('/api/user', data))
+			.then(res => res.data)
+			.then(user => this.setState({...this.state, users: this.state.users.concat(user)}));
+	
+	deleteUser = uuid =>
+		axios.delete(`/api/user/${uuid}`)
+			.then(() => this.getUsers());
+	
+	deleteUsers = () =>
+		axios.delete('/api/user')
+			.then(() => this.setState({...this.state, users: []}));
+
+	getUserData = () =>
+		axios.get('https://randomuser.me/api')
+			.then(res => res.data)
+			.then(data => {
+				let user = data.results[0];
+				return {
+					name: user.name.first + ' ' + user.name.last,
+					email: user.email,
+					password: user.login.password,
+					img: user.picture.large,
+					registered: user.registered,
+					phone: user.phone,
+					nat: user.nat.toLowerCase()
+				}
+			});
 
 	_setSidebarMenu = (visible) => {
 		clearTimeout(this.state.menu.delayTimeout);
@@ -126,13 +166,33 @@ export default class Home extends React.Component {
 						</div>
 
 						<ContentSegment>
-							<div className="column">
-								<h1>Welcome!</h1>
-								<p>
-									<%= appName %>: <%= appDesc %>
-								</p>
+							<div className="row"><h1>Users: {this.state.users.length}</h1></div>
+							<div className="row">
+								<button className="ui huge primary button" onClick={this.createUser}>Add User</button>
+								<button className="ui huge primary button" onClick={this.deleteUsers}>Delete Users</button>
 							</div>
-
+							<div className="row">
+								<div className="ui four cards" style={{width:'100%'}}>
+									{_.map(this.state.users, user =>
+										<div className="ui link card" key={user.uuid}>
+											<div className="image">
+												<img src={user.img}/>
+											</div>
+											<div className="content">
+												<div className="header">{user.name}</div>
+												<div className="meta">
+													Joined {moment([2016 - Math.round(Math.random() * 6), Math.round(Math.random() * 12)]).format('MMM YYYY')}</div>
+												<i className={classnames(user.nat, 'flag', 'right floated')}></i>
+											</div>
+											<div className="extra content">
+												<a><span className="">{user.email}</span></a>
+												<i className="right floated close large icon"
+												   onClick={this.deleteUser.bind(null, user.uuid)}></i>
+											</div>
+										</div>
+									)}
+								</div>
+							</div>
 						</ContentSegment>
 
 					</div>

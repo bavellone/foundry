@@ -49,8 +49,9 @@ function vendorJS(cb) {
 }
 
 function vendorCSS(cb) {
-	var replace = {
-		'/assets/fonts': /(themes\/default\/assets\/fonts)/g // Replace path to semantic font-icons
+	let replace = {
+		'/assets/fonts': /(themes\/default\/assets\/fonts)/g, // Replace path to semantic font-icons
+		'/assets/css/flags.png': /(themes\/default\/assets\/images\/flags.png)/g // Replace path to semantic flags
 	};
 
 	return gulp.src(pack.paths.src.vendor.css)
@@ -74,13 +75,19 @@ function vendorCSS(cb) {
 }
 
 function vendorMisc(cb) {
-	q.nfcall(
-		fse.copy,
-		path.resolve(pack.paths.src.vendor.fonts),
-		path.resolve(pack.paths.dist.vendor.fonts))
-		.then(
-			() => {
-				cb();
-			},
-			err => console.error(err));
+	q.all([
+		q.nfcall(
+			fse.copy,
+			path.resolve(pack.paths.src.vendor.fonts),
+			path.resolve(pack.paths.dist.vendor.fonts)
+		),
+		q.nfcall(
+			fse.copy,
+			path.resolve(pack.paths.src.vendor.flags),
+			path.resolve(pack.paths.dist.vendor.css.dir + '/flags.png')
+		)
+	]).then(
+		() => cb(),
+		::console.error
+	);
 }

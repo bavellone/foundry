@@ -70,18 +70,26 @@ Generator.prototype.prompting =  function () {
 			case 'neo4jRest':
 				this.dbPackages = 'seraph seraph-model';
 				this.DBAdapterPath = 'seraph';
+				this.dbPort = 7474;
+				this.dbProto = 'http';
 				break;
 			case 'neo4jBolt':
 				this.dbPackages = 'neo4j-driver';
 				this.DBAdapterPath = 'bolt';
+				this.dbPort = 7687;
+				this.dbProto = 'bolt';
 				break;
 			case 'mongoose':
 				this.dbPackages = 'mongoose';
 				this.DBAdapterPath = 'mongo';
+				this.dbPort = 27017;
+				this.dbProto = 'mongo';
 				break;
 			case 'sql':
 				this.dbPackages = 'sequelize';
 				this.DBAdapterPath = 'sql';
+				this.dbPort = 3306;
+				this.dbProto = 'tcp';
 				break;
 		}
 
@@ -116,5 +124,18 @@ Generator.prototype.install = {
 };
 
 Generator.prototype.end = function () {
-	console.log(chalk.green('Almost done! Run "npm run build:dev" to complete installation'));
+	var done = this.async();
+	spawn('npm', ['run', 'build:dev'], {
+		cwd: process.cwd(),
+		stdio: 'inherit'
+	})
+		.on('error', function (err) {
+			console.error(err);
+			done(err);
+		})
+		.on('exit', () => {
+			console.log(`Run server in development mode with debug output - 'npm run dev:dbg'`);
+			console.log(`Run server in production mode - 'npm start`);
+			done();
+		});
 };

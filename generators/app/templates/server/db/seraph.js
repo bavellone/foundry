@@ -6,6 +6,7 @@ import debug from 'debug';
 import seraph from 'seraph';
 import seraphModel from 'seraph-model';
 import request from 'request';
+import uuid from 'node-uuid'
 
 import Model from './model';
 import {ValidationError, wrap} from './../libs/errors';
@@ -15,21 +16,21 @@ const dbg = debug('app:db:neo4j:seraph');
 
 export default class Seraph {
 	uri = '';
-	
+
 	constructor(uri) {
 		this.uri = uri;
 	};
-	
-	connect = () => 
+
+	connect = () =>
 		seraph(this.uri);
-	
+
 	/**
 	 * Sends a request to the provided uri to probe if it is currently up. Returns a Promise that is resolved if a 200
 	 * response is received and rejected with an error string otherwise
 	 * @param uri
 	 * @returns {Promise}
 	 */
-	ping = () => 
+	ping = () =>
 		Q.Promise((resolve, reject) => {
 			request(this.uri, (err, res, body) => {
 				if (err || res.statusCode != 200)
@@ -37,7 +38,7 @@ export default class Seraph {
 				resolve()
 			})
 		});
-	
+
 	registerSchema = (db, schema, label) =>
 		dbg(`Registering ${schema.type} schema`) ||
 		Q.Promise(resolve => {
@@ -72,15 +73,14 @@ class SeraphModel extends Model {
 		Q.ninvoke(this.model, 'findAll')
 			.then(models => models.map(model => this.schema.toJSON(model, this.schema.blacklist)));
 
-	create = (data) =>
-		new this.schema(data).validate(this.schema.validationSettings.create)
-			.then(
-				() => Q.ninvoke(this.model, 'save', data),
-				err => Q.reject(new ValidationError(err))
-			)
+	create = data =>
+		new this.schema(data)
+			.validateCreate().catch(err => Q.reject(new ValidationError(err)))
+			.then(data => ({...data, uuid: uuid.v4()}))
+			.then(data => Q.ninvoke(this.model, 'save', data))
 			.then(model => this.schema.toJSON(model, this.schema.blacklist));
 
-	read = (id, ops = {raw: false}) =>
+	read = (uuid, ops = {raw: false}) =>
 		Q.ninvoke(this.model, 'read', id)
 			.then(model => ops.raw ? model : this.schema.toJSON(model, this.schema.blacklist));
 
@@ -90,9 +90,11 @@ class SeraphModel extends Model {
 				return this.create({...result, ...data});
 			});
 
-	destroy = (id) =>
-		Q.ninvoke(this.model, 'delete', id);
+	destroy = uuid =>
+		Q.ninvoke(this.model.db, 'query', `MATCH (n:${this.schema.type} {uuid: {uuid}}) DETACH DELETE n`, {uuid})
+			.catch(err => dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err)));
 
 	destroyAll = () =>
-		Q.ninvoke(this.model, 'query', `MATCH (n:${this.schema.type}) DETACH DELETE n`);
+		Q.ninvoke(this.model.db, 'query', `MATCH (n:${this.schema.type}) DETACH DELETE n`)
+			.catch(err => dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err)));
 }

@@ -4,7 +4,7 @@
 import Q from 'q';
 import debug from 'debug';
 import neo4jDriver from 'neo4j-driver';
-import request from 'request';
+import uuid from 'node-uuid'
 import _ from 'lodash';
 
 import Model from './model';
@@ -59,11 +59,7 @@ export default class Bolt {
 		);
 
 	query = (driver, queryStr, params = {}) =>
-	dbg(queryStr) || Q.when(
-		driver.session()
-			.run(queryStr, params)
-	)
-		.then(res => dbg('Done') || res)
+	Q.when(driver.session().run(queryStr, params))
 		.catch(err => dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err)));
 
 	createModel = (model, schema) => {
@@ -91,27 +87,29 @@ class BoltModel extends Model {
 			.then(models => _.map((models instanceof Array ? models : [models]), model => this.schema.toJSON(model, this.schema.blacklist)));
 
 	create = (data) =>
-		new this.schema(data).validate(this.schema.validationSettings.create)
+		new this.schema(data)
+			.validateCreate().catch(err => Q.reject(new ValidationError(err)))
+			.then(data => ({...data, uuid: uuid.v4()}))
 			.then(
-				() => this.model.query(`CREATE (n:${this.model.label} {params}) RETURN n`, {params: data}),
+				data => this.model.query(`CREATE (n:${this.model.label} {params}) RETURN n`, {params: data}),
 				err => Q.reject(new ValidationError(err))
 			)
 			.then(res => BoltModel.transformRecords(res.records))
 			.then(model => this.schema.toJSON(model, this.schema.blacklist));
 
-	read = (id, ops = {raw: false}) =>
-		this.model.query(`MATCH (n:${this.model.label}) return n limit 1`)
+	read = (uuid, ops = {raw: false}) =>
+		this.model.query(`MATCH (n:${this.model.label} {uuid: {uuid}}) return n limit 1`, {uuid})
 			.then(res => BoltModel.transformRecords(res.records))
 			.then(model => ops.raw ? model : this.schema.toJSON(model, this.schema.blacklist));
 
-	update = (id, data) =>
-		this.read(id, {raw: true})
+	update = (uuid, data) =>
+		this.read(uuid, {raw: true})
 			.then(result => {
 				return this.create({...result, ...data});
 			});
 
-	destroy = (id) =>
-		this.model.query(`MATCH (n:${this.schema.type}) DETACH DELETE n`);
+	destroy = uuid =>
+		this.model.query(`MATCH (n:${this.schema.type} {uuid: {uuid}}) DETACH DELETE n`, {uuid});
 
 	destroyAll = () =>
 		this.model.query(`MATCH (n:${this.schema.type}) DETACH DELETE n`);

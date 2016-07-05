@@ -182,12 +182,12 @@ export default class Home extends React.Component {
 												<div className="header">{user.name}</div>
 												<div className="meta">
 													Joined {moment([2016 - Math.round(Math.random() * 6), Math.round(Math.random() * 12)]).format('MMM YYYY')}</div>
-												<i className={classnames(user.nat, 'flag', 'right floated')}></i>
+												<i className={classnames(user.nat, 'flag', 'right floated')}/>
 											</div>
 											<div className="extra content">
 												<a><span className="">{user.email}</span></a>
-												<i className="right floated close large icon"
-												   onClick={this.deleteUser.bind(null, user.uuid)}></i>
+												< className="right floated close large icon"
+												   onClick={this.deleteUser.bind(null, user.uuid)}/>
 											</div>
 										</div>
 									)}

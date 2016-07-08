@@ -18,12 +18,15 @@ var wrap = function (err) {
 		return new Neo4jExecutionFailure('Query Execution Failed');
 	else if (err instanceof ValidationError)
 		return err;
-	else if (err.code == 'ENOTFOUND' || err.code == 'ECONNREFUSED' || _.includes(err, 'Database')) // Neo4j connection errors
+	else if (err.code == 'ENOTFOUND' ||  // Neo4j connection errors
+		err.code == 'ECONNREFUSED' ||
+		_.includes(err, 'Database') ||
+		_.includes(err, 'EPIPE'))
 		return new DBConnectionError(err.toString());
 	else if (err instanceof BaseError)
-		return err;
+		return err
 	else
-		return new BaseError(500, 'Unknown', err.toString());
+		return debug(err, err.code) || new BaseError(err.code, 'Unknown', err.toString());
 };
 
 module.exports.wrap = wrap;

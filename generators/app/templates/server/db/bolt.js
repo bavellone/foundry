@@ -25,7 +25,9 @@ export default class Bolt {
 	};
 
 	connect = () =>
-		neo4j.driver(this.uri);
+		neo4j.driver(this.uri, neo4j.auth.basic('neo4j', 'neo4j'), {
+			encrypted: false
+		});
 
 	disconnect = driver =>
 		driver.close();
@@ -40,7 +42,8 @@ export default class Bolt {
 			let uri = url.parse(this.uri);
 			let ping = net.connect({
 				port: uri.port,
-				host: uri.host
+				host: uri.hostname,
+				protocol: 'tcp'
 			}, () => ping.end());
 			ping
 				.on('end', resolve)
@@ -68,8 +71,12 @@ export default class Bolt {
 			)
 		);
 
-	query = (driver, queryStr, params = {}) =>
-		Q.when(driver.session().run(queryStr, params));
+	query = (driver, queryStr, params = {}) => {
+		const session = driver.session();
+		return Q.when(session.run(queryStr, params))
+			.finally(() => session.close());
+	};
+
 
 	createModel = (model, schema) => {
 		return new BoltModel(model, schema)
@@ -80,7 +87,6 @@ class BoltModel extends Model {
 	static transformRecords = records => {
 		if (!(records instanceof Array))
 			return [];
-
 		let data = _.reduce(records, (rv, record) => {
 			rv.push(record._fields[0].properties);
 			return rv

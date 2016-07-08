@@ -6,9 +6,11 @@ import debug from 'debug';
 import neo4jDriver from 'neo4j-driver';
 import uuid from 'node-uuid'
 import _ from 'lodash';
+import net from 'net';
+import url from 'url';
 
 import Model from './model';
-import {ValidationError, wrap} from './../libs/errors';
+import {ValidationError} from './../libs/errors';
 import {createTimeTree} from './bootstrapCQL';
 
 const dbg = debug('app:db:neo4j:bolt');
@@ -23,7 +25,7 @@ export default class Bolt {
 	};
 
 	connect = () =>
-		neo4j.driver(this.uri, neo4j.auth.basic('neo4j', 'neo4j'));
+		neo4j.driver(this.uri);
 
 	disconnect = driver =>
 		driver.close();
@@ -31,36 +33,43 @@ export default class Bolt {
 	/**
 	 * Sends a request to the provided uri to probe if it is currently up. Returns a Promise that is resolved if a 200
 	 * response is received and rejected with an error string otherwise
-	 * @param uri
 	 * @returns {Promise}
 	 */
 	ping = () =>
-		Q.resolve();
+		Q.Promise((resolve, reject) => {
+			let uri = url.parse(this.uri);
+			let ping = net.connect({
+				port: uri.port,
+				host: uri.host
+			}, () => ping.end());
+			ping
+				.on('end', resolve)
+				.on('error', reject)
+		});
 
 	registerSchema = (db, schema, label) =>
 	dbg(`Registering ${schema.type} schema`) ||
 	Q.Promise(resolve => {
 		resolve(
-			this.createModel({query: this.query.bind(this, db), label}, schema)
+			this.createModel({query: db.query, label}, schema)
 		);
 	});
 
-	bootstrap = () =>
+	bootstrap = db =>
 	dbg('Checking if DB Bootstrap needed') ||
-	this.query('MATCH (n:TimeTreeRoot) RETURN count(n) AS count').then(res => {
+	db.query('MATCH (n:TimeTreeRoot) RETURN count(n) AS count').then(res => {
 		if (res[0].count == 0)
 			return Q.reject();
 	})
 		.catch(() =>
 			dbg('Bootstrapping DB') ||
-			this.query(createTimeTree).then(
+			db.query(createTimeTree).then(
 				() => dbg('Created time tree') || dbg('Bootstrapping complete!')
 			)
 		);
 
 	query = (driver, queryStr, params = {}) =>
-	Q.when(driver.session().run(queryStr, params))
-		.catch(err => dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err)));
+		Q.when(driver.session().run(queryStr, params));
 
 	createModel = (model, schema) => {
 		return new BoltModel(model, schema)

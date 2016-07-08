@@ -9,7 +9,7 @@ import request from 'request';
 import uuid from 'node-uuid'
 
 import Model from './model';
-import {ValidationError, wrap} from './../libs/errors';
+import {ValidationError} from './../libs/errors';
 import {createTimeTree} from './bootstrapCQL';
 
 const dbg = debug('app:db:neo4j:seraph');
@@ -27,7 +27,6 @@ export default class Seraph {
 	/**
 	 * Sends a request to the provided uri to probe if it is currently up. Returns a Promise that is resolved if a 200
 	 * response is received and rejected with an error string otherwise
-	 * @param uri
 	 * @returns {Promise}
 	 */
 	ping = () =>
@@ -41,27 +40,25 @@ export default class Seraph {
 
 	registerSchema = (db, schema, label) =>
 		dbg(`Registering ${schema.type} schema`) ||
-		Q.Promise(resolve => {
-			resolve(
-				this.createModel(seraphModel(db, label), schema)
-			);
-		});
+		db.connected.then(seraph => 
+			this.createModel(Object.assign(seraphModel(seraph, label), {query: db.query}), schema)
+		);
 
-	bootstrap = () =>
+	bootstrap = db =>
 		dbg('Checking if DB Bootstrap needed') ||
-		this.query('MATCH (n:TimeTreeRoot) RETURN count(n) AS count').then(res => {
+		db.query('MATCH (n:TimeTreeRoot) RETURN count(n) AS count').then(res => {
 			if (res[0].count == 0)
 				return Q.reject();
 		})
 		.catch(() =>
 			dbg('Bootstrapping DB') ||
-			this.query(createTimeTree).then(
+			db.query(createTimeTree).then(
 				() => dbg('Created time tree') || dbg('Bootstrapping complete!')
 			)
 		);
 
 	query = (db, queryStr, params = {}) =>
-		Q.ninvoke(db, 'query', queryStr, params).catch(err => dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err)));
+		Q.ninvoke(db, 'query', queryStr, params);
 
 	createModel = (model, schema) => {
 		return new SeraphModel(model, schema)
@@ -81,7 +78,7 @@ class SeraphModel extends Model {
 			.then(model => this.schema.toJSON(model, this.schema.blacklist));
 
 	read = (uuid, ops = {raw: false}) =>
-		Q.ninvoke(this.model, 'read', id)
+		Q.ninvoke(this.model, 'read', uuid)
 			.then(model => ops.raw ? model : this.schema.toJSON(model, this.schema.blacklist));
 
 	update = (id, data) =>
@@ -91,10 +88,8 @@ class SeraphModel extends Model {
 			});
 
 	destroy = uuid =>
-		Q.ninvoke(this.model.db, 'query', `MATCH (n:${this.schema.type} {uuid: {uuid}}) DETACH DELETE n`, {uuid})
-			.catch(err => dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err)));
+		this.model.query(`MATCH (n:${this.schema.type} {uuid: {uuid}}) DETACH DELETE n`, {uuid});
 
 	destroyAll = () =>
-		Q.ninvoke(this.model.db, 'query', `MATCH (n:${this.schema.type}) DETACH DELETE n`)
-			.catch(err => dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err)));
+		this.model.query(`MATCH (n:${this.schema.type}) DETACH DELETE n`);
 }

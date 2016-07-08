@@ -5,6 +5,7 @@ bower_components/
 !public/assets/index.html
 public/assets/
 public/semantic/
+test/
 assets/js
 assets/css
 assets/fonts

@@ -22,6 +22,7 @@ export default class DB {
 	connected = this._connection.promise;
 	models = [];
 	adapter = null;
+	connectionAttempts = 0;
 
 	/**
 	 * Pass in an adapter instance which will be used to handle interacting with DB driver
@@ -57,6 +58,10 @@ export default class DB {
 			.catch(err => {
 				dbg(err);
 				dbg(`Retrying in ${ops.poll}s`);
+				
+				if (this.connectionAttempts++ % 4 == 3)
+					ops.poll *= 2;
+
 				return Q.Promise(resolve => {
 					setTimeout(() => {
 						resolve(this.connect(ops))
@@ -79,9 +84,9 @@ export default class DB {
 	 */
 	registerSchema = (schema, label) => 
 		this.connected.then(db => {
-			return this.adapter.registerSchema(db, schema, label)
+			return this.adapter.registerSchema(this, schema, label)
 		}).then(model => {
-			this.models.push({model,schema,label});
+			this.models.push({model, schema, label});
 			return model
 		});
 
@@ -89,7 +94,7 @@ export default class DB {
 	 * Runs the DB Bootstrap code if necessary
 	 */
 	bootstrap = () =>
-		this.adapter.bootstrap();
+		this.connected.then(db => adapter.bootstrap(db));
 
 	/**
 	 * Execute a query against this DB
@@ -100,5 +105,7 @@ export default class DB {
 	query = (queryStr, params = {}) =>
 		this.connected.then(db =>
 			this.adapter.query(db, queryStr, params)
+		).catch(err =>
+			dbg(`Query Error! ${err.toString()}`) || Q.reject(wrap(err))
 		);
 }

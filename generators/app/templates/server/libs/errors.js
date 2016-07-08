@@ -18,14 +18,12 @@ var wrap = function (err) {
 		return new Neo4jExecutionFailure('Query Execution Failed');
 	else if (err instanceof ValidationError)
 		return err;
-	else if (err.code == 'ENOTFOUND' || err.code == 'ECONNREFUSED') // Neo4j connection errors
+	else if (err.code == 'ENOTFOUND' || err.code == 'ECONNREFUSED' || _.includes(err, 'Database')) // Neo4j connection errors
 		return new DBConnectionError(err.toString());
-	else {
-		console.error('UNKNOWN ERROR');
-		console.error(err);
-		console.error(err.stack);
+	else if (err instanceof BaseError)
 		return err;
-	}
+	else
+		return new BaseError(500, 'Unknown', err.toString());
 };
 
 module.exports.wrap = wrap;
@@ -59,7 +57,8 @@ function BaseError(code, name, desc) {
 
 	this.code = this.code || 500;
 	this.name = this.name || '';
-	this.desc = this.desc || [];
+	this.desc = this.desc || '';
+	this.message = this.desc;
 }
 
 util.inherits(BaseError, Error);
@@ -101,7 +100,7 @@ module.exports.return404 = function (req, res) {
 module.exports.catchAll = function catchAll(err, req, res, next) {
 	if (err instanceof BaseError) {
 		debug('Caught Application Error');
-		debug(err.name, err.desc);
+		debug(`${err.name}: ${err.desc}`);
 	}
 	else {
 		debug('Caught error');
@@ -110,7 +109,7 @@ module.exports.catchAll = function catchAll(err, req, res, next) {
 	}
 
 	if (!res.headersSent) {
-		res.status(err.code || 500);
+		res.status(err.code >= 100 && err.code <= 500 ? err.code : 500);
 
 		var whitelist = ['code', 'name', 'desc', 'data'];
 

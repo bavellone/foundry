@@ -186,7 +186,7 @@ export default class Home extends React.Component {
 											</div>
 											<div className="extra content">
 												<a><span className="">{user.email}</span></a>
-												< className="right floated close large icon"
+												<i className="right floated close large icon"
 												   onClick={this.deleteUser.bind(null, user.uuid)}/>
 											</div>
 										</div>

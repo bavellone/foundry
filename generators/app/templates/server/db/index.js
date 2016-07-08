@@ -36,6 +36,7 @@ export default class DB {
 	};
 
 	refreshConnection() {
+		this.connecting = false;
 		this._connection = Q.defer();
 		this.connected = this._connection.promise;
 	};
@@ -43,9 +44,9 @@ export default class DB {
 	/**
 	 * Attempt to establish a connection to the database
 	 */
-	connect = (ops = {force: false, poll: 1, timeout: 1000}) => {
+	connect = (ops = {poll: 1, timeout: 1000}) => {
 		// Skip connecting if we are already connecting
-		if (this.connecting && !ops.force)
+		if (this.connecting)
 			return dbg('Already connecting to DB') || this.connected;
 
 		// Skip connecting if we are already connected
@@ -59,7 +60,6 @@ export default class DB {
 				() => {
 					dbg(`DB connection established!`);
 					this._connection.resolve(this.adapter.connect());
-					dbg(this.connected)
 					return this.connected;
 				},
 				(err) => {
@@ -78,7 +78,7 @@ export default class DB {
 				return Q.Promise(resolve => {
 					setTimeout(() => {
 						this.refreshConnection();
-						resolve(this.connect({...ops, force: true}))
+						resolve(this.connect(ops))
 					}, ops.poll * ops.timeout);
 				});
 			})

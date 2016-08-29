@@ -65,6 +65,9 @@ Generator.prototype.prompting =  function () {
 	// Collect all answers and save to the generator
 	this.prompt(prompts, function (props) {
 		_.merge(this, props);
+    
+    // TODO - Store these values in config file in a format that allows multiple
+    // to be defined stored instead of just one
 		
 		switch(props.dbBackend) {
 			case 'neo4jRest':

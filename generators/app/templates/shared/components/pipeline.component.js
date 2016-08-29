@@ -50,8 +50,8 @@ export default class Pipeline extends React.Component {
 
             return (
               <div 
-              className={classnames("ui fluid card", {deleting: this.state.deleting.indexOf(item) !== -1})}
-              key={item.uuid}
+                className={classnames("ui fluid card", {deleting: this.state.deleting.indexOf(item) !== -1})}
+                key={item.id}
               >
                 <div className="extra content">
                   <span className="left floated">

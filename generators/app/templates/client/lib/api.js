@@ -23,32 +23,32 @@ export class CRUDAPI {
   }
   list = () => 
     dbg(`GET ${this.path}/`) ||
-    this.api.get(`${this.path}/`)
+    this.api.get('/')
       .then(CRUDAPI.transformResponse)
   
   read = id =>
     dbg(`GET ${this.path}/${id}`) ||
-    this.api.get(`${this.path}/${id}`)
+    this.api.get(`/${id}`)
       .then(CRUDAPI.transformResponse)
   
   create = data =>
     dbg(`POST ${this.path}/`) ||
-    this.api.post(`${this.path}/`, data)
+    this.api.post('/', data)
       .then(CRUDAPI.transformResponse)
   
   update = (id, data) =>
     dbg(`PUT ${this.path}/${id}`) ||
-    this.api.put(`${this.path}/${id}`, data)
+    this.api.put(`/${id}`, data)
       .then(CRUDAPI.transformResponse)
   
   destroy = id =>
     dbg(`DELETE ${this.path}/${id}`) ||
-    this.api.delete(`${this.path}/${id}`)
+    this.api.delete(`/${id}`)
       .then(CRUDAPI.transformResponse)
   
   destroyAll = () =>
     dbg(`DELETE ${this.path}/`) ||
-    this.api.delete(`${this.path}/`)
+    this.api.delete('/')
       .then(CRUDAPI.transformResponse)
 }
 

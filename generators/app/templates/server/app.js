@@ -2,17 +2,14 @@
 // TODO - need to add proper logging support, i.e. add a logging lib and routes all logs through handlers
 
 var path = require('path'),
-	config = require('./config'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
 	cookieParser = require('cookie-parser'),
 	http = require('http'),
-	pack = require('../package'),
 	debug = require('debug'),
 	dbgInit = debug('app:init'),
 	dbgErr = debug('app:error'),
-	dbgReq = debug('app:request'),
-	errors = require('./libs/errors');
+	dbgReq = debug('app:request');
 
 import fs from 'fs';
 import Q from 'q';
@@ -22,7 +19,10 @@ import DB from './db';
 import DBAdapter from './db/<%= DBAdapterPath %>';<% } if (useAuth) { %>
 import {readToken} from './libs/auth';<% } %>
 
-module.exports = function () {
+import attachAPI from './api';
+import attachRouter from './router';
+
+module.exports = function (config) {
 	dbgInit('Creating new app');
 	var app = express();
 	
@@ -35,17 +35,12 @@ module.exports = function () {
 	app.enable('trust proxy');
 	<% if (useDB) { %>
 	app.db = new DB({
+    uri: config.db,
 		adapter: new DBAdapter(config.db)
 	});<% } %>
 
 	http.globalAgent.maxSockets = config.connectionPool;
 
-	// Serve app shell when root is requested
-	app.get('/', (req, res) => {
-		res.header('X-Version', pack.version);
-		fs.createReadStream(path.resolve(path.join(config.assets,'/index.html')))
-			.pipe(res)
-	});
 	app.use('/assets', express.static(path.resolve(config.assets)));
 	app.use('/assets', express.static(path.resolve(config.dataDir)));
 	app.get('/assets/favicon.png', (req, res) => {
@@ -70,34 +65,21 @@ module.exports = function () {
 		dbgReq(`${req.ip}\t${req.method}\t${req.url}\t${req.xhr ? 'XHR' : ''}`);
 		next();
 	});
+  
+  dbgInit('App configured');
 
-	app.ready =	Q.resolve()<% if (useDB) { %>
-		.then(app.db.connect())
-		.then(() => dbgInit('DB initialized!'))<% } %>
-		.then(() => require('./api.js')(app))
-		.then(() => dbgInit('API initialized!'))
-		.then(() => handleRequests(app))
-		.then(() => dbgInit('Application initialization complete!'))
-		.catch(dbgErr);
+  app.ready =	Promise.resolve()
+    .then(() => dbgInit('App initializing'))
+    <% if (useDB) { %>
+  	.then(app.db.connect())
+  	.then(() => dbgInit('DB initialized!'))<% } %>
+  	.then(() => app.db.connect())
+  	.then(() => dbgInit('DB initialized!'))
+  	.then(() => attachAPI(app))
+  	.then(() => dbgInit('API initialized!'))
+  	.then(() => attachRouter(app))
+  	.then(() => dbgInit('Application initialization complete!'))
+  	.catch(dbgErr);
 
 	return app;
 };
-
-function handleRequests(app) {
-	app.get('/*', (req, res) => {
-		res.sendFile('/index.html', {root: config.assets}, err => {
-			if (err) {
-				dbgErr(err);
-				if (err.status)
-					return res.status(err.status).end();
-				res.sendStatus(500);
-			}
-		});
-	});
-
-	// Send 404 for any requests that don't match API or static routes
-	app.use(errors.return404);
-
-	// Error handling
-	app.use(errors.catchAll);
-}

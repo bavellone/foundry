@@ -12,7 +12,7 @@ import {fetchComponentsData} from '../shared/utils';
 import {return404, catchAll, wrap} from './libs/errors';
 import debug from 'debug';
 
-const pack = require('../../package.json');
+const pack = require('../package.json');
 
 const dbgReq = debug('app:request');
 

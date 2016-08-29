@@ -11,13 +11,9 @@ import Pipeline from '../../pipeline.component';
 
 import {addOperation, removeOperation, listImages, addImage, removeImage, clearAll} from '../../../redux'
 
-class Home extends React.Component {
+export class Home extends React.Component {
   static propTypes = {
     form: PropTypes.object
-  }
-  
-  static fetchData({dispatch}) {
-    return dispatch(listImages());
   }
   
   static mapStateToProps(state) {
@@ -43,6 +39,10 @@ class Home extends React.Component {
 	componentDidMount() {
 		// this.getUsers();
 	}
+  
+  static fetchData({dispatch}) {
+    return dispatch(listImages());
+  }
   
   loadImage = (e) => {
     let file;
@@ -115,7 +115,7 @@ class Home extends React.Component {
           <div className='toolbar-row'>
             <div className="ui items">
               {this.props.images.map(image => 
-                <div className="item" key={image.uuid}>
+                <div className="item" key={image.id}>
                   <div className="content">
                     <a href="#" className="header">{image.name}</a>
                     <div className="meta"><span>{image.size / 1024}</span></div>
@@ -126,11 +126,11 @@ class Home extends React.Component {
           </div>
           <div className='spacious toolbar-row'>
             <input type="file" hidden ref={r => this.fileInput = r}
-            onChange={this.loadImage}
+              onChange={this.loadImage}
             />
             <button className="ui button load" onClick={e => this.fileInput.click(e)}>
               <span><i className='ui image icon'></i></span>
-              Load Image 2
+              Load Image 
             </button>
 
             <button className="ui button clear" onClick={this.props.clearAll}>
@@ -149,10 +149,10 @@ class Home extends React.Component {
                 <div className="field">
                   <label>Operations</label>
                   <Dropdown 
-                  items={this.props.operations}
-                  selectDropdown
-                  returnItem
-                  onChange={this.props.form.update('operation')}
+                    items={this.props.operations}
+                    selectDropdown
+                    returnItem
+                    onChange={this.props.form.update('operation')}
                   />
                 </div>
                 <div className="field">

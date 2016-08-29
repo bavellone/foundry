@@ -59,28 +59,27 @@ export default class Bolt {
 }
 
 class BoltModel extends Model {
-	static transformRecords = records => {
-		if (!(records instanceof Array))
-			return [];
+	static transformResponse = res => {
+    let records = res.records;
+		if (records && !(records instanceof Array))
+			records = [records];
+    else
+      return [];
+    
     var tmp;
-		let data = _.reduce(records, (rv, record) => {
+		return _.reduce(records, (rv, record) => {
       tmp = record._fields[0].properties;
       tmp.id = tmp.uuid;
       delete tmp.uuid
 			rv.push(tmp);
 			return rv
 		}, []);
-		if (records.length === 1)
-			data = data[0];
-    if (records.length === 0)
-      data = null;
-		return data
 	};
 	
 	list = (ops = {limit: 100}) =>
 		this.model.query(`MATCH (n:${this.model.label}) RETURN n LIMIT ${ops.limit}`)
-			.then(res => BoltModel.transformRecords(res.records))
-			.then(models => _.map((models instanceof Array ? models : [models]), model => this.schema.toJSON(model, this.schema.blacklist)));
+			.then(BoltModel.transformResponse)
+			.then(records => _.map(records, record => this.schema.toJSON(record, this.schema.blacklist)));
 
 	create = (data) =>
 		new this.schema(data)
@@ -91,16 +90,16 @@ class BoltModel extends Model {
 			.then(
 				data => this.model.query(`CREATE (n:${this.model.label} {params}) RETURN n`, {params: data})
 			)
-			.then(res => BoltModel.transformRecords(res.records))
-			.then(model => this.schema.toJSON(model, this.schema.blacklist));
+			.then(BoltModel.transformResponse)
+			.spread(record => this.schema.toJSON(record, this.schema.blacklist));
 
 	read = (uuid, ops = {raw: false}) =>
 		this.model.query(`MATCH (n:${this.model.label} {uuid: {uuid}}) RETURN n limit 1`, {uuid})
-			.then(res => BoltModel.transformRecords(res.records))
-      .then(record => {
-        if (!record)
+			.then(BoltModel.transformResponse)
+      .then(records => {
+        if (!records.length)
           return Q.reject(new Neo4jNotFound({message: `${this.schema.type} not found with ID: [${uuid}]`}))
-        return record
+        return records[0]
       })
 			.then(model => ops.raw ? model : this.schema.toJSON(model, this.schema.blacklist));
 
@@ -110,17 +109,19 @@ class BoltModel extends Model {
       .then(
         data => this.model.query(`MATCH (n:${this.model.label} {uuid: {uuid}}) SET n += {data} RETURN n`, {data, uuid})
       )
-      .then(record => {
+      .then(BoltModel.transformResponse)
+      .spread(record => {
         if (!record)
           return Q.reject(new Neo4jNotFound({message: `${this.schema.type} not found with ID: [${uuid}]`}))
         return record
       })
-      .then(res => BoltModel.transformRecords(res.records))
       .then(model => this.schema.toJSON(model, this.schema.blacklist))
 
 	destroy = uuid =>
-		this.model.query(`MATCH (n:${this.schema.type} {uuid: {uuid}}) DETACH DELETE n`, {uuid});
+		this.model.query(`MATCH (n:${this.schema.type} {uuid: {uuid}}) DETACH DELETE n`, {uuid})
+      .then(BoltModel.transformResponse);
 
 	destroyAll = () =>
-		this.model.query(`MATCH (n:${this.schema.type}) DETACH DELETE n`);
+		this.model.query(`MATCH (n:${this.schema.type}) DETACH DELETE n`)
+      .then(BoltModel.transformResponse);
 }

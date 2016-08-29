@@ -50,8 +50,8 @@ function vendorJS(cb) {
 
 function vendorCSS(cb) {
 	let replace = {
-		'/assets/fonts': /(themes\/default\/assets\/fonts)/g, // Replace path to semantic font-icons
-		'/assets/css/flags.png': /(themes\/default\/assets\/images\/flags.png)/g // Replace path to semantic flags
+		'../fonts': /(themes\/default\/assets\/fonts)/g, // Replace path to semantic font-icons
+		'flags.png': /(themes\/default\/assets\/images\/flags.png)/g // Replace path to semantic flags
 	};
 
 	return gulp.src(pack.paths.src.vendor.css)

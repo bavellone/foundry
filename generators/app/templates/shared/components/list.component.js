@@ -6,10 +6,6 @@ import _ from 'lodash';
 
 export default function List(Component) {
 	return class List extends React.Component {
-		constructor(props) {
-			super(props);
-		}
-		
 		state = {
 			page: 1
 		};

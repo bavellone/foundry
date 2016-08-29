@@ -8,20 +8,22 @@ var gulp = require('gulp'),
 	chalk = require('chalk'),
 	watchify = require('watchify'),
 	babelify = require('babelify'),
+	livereactload = require('livereactload'),
 	source = require('vinyl-source-stream'),
 	buffer = require('vinyl-buffer'),
 	pack = require('../package'),
-	utils = require('./utils'),
-	fse = require('fs-extra'),
-	path = require('path');
+	utils = require('./utils');
 
-function makeBundle(cb) {
+const isProd = (process.env.NODE_ENV === 'production');
+
+function createBundler(useWatchify, cb) {
 	return browserify({
 		entries: [pack.paths.dist.app.js.entryPoint],
 		extensions: ['.jsx'],
+    plugin: (isProd || !useWatchify ? [] : [livereactload]),
 		transform: [babelify],
-		debug: process.env.NODE_ENV != 'production',
-		cache: {}, packageCache: {}, fullPaths: false
+		debug: isProd,
+		cache: {}, packageCache: {}, fullPaths: !isProd
 	})
 		.external(pack.paths.src.vendor.deps.concat(pack.paths.src.vendor.libs))
 		.on('error', utils.onErr)
@@ -29,15 +31,11 @@ function makeBundle(cb) {
 }
 
 function appJS(cb) {
-	fse.copy(path.resolve('public/index.html'), path.resolve('assets/index.html'), (err) => {
-		if (err)
-			console.error(err);
-		bundleApp(makeBundle(cb))
-	});
+	bundleApp(createBundler(false, cb))
 }
 
 function watchAppJS() {
-	var watcher = watchify(makeBundle());
+	var watcher = watchify(createBundler(true));
 
 	watcher
 		.on('update', function () {
@@ -53,7 +51,7 @@ function bundleApp(b) {
 		.on('error', utils.onErr)
 		.pipe(source(pack.paths.dist.app.js.file));
 
-	if (process.env.NODE_ENV == 'production' || process.env.MINIFY == 'true')
+	if (isProd || process.env.MINIFY == 'true')
 		bundle = bundle
 			.pipe(buffer())
 			.pipe(plugins.uglify());
@@ -67,7 +65,7 @@ function appSCSS(cb) {
 	gulp.src(pack.paths.src.app.scss)
 		.pipe(plugins.concat(pack.paths.dist.app.css.file))
 		.pipe(plugins.sass({
-			outputStyle: (process.env.NODE_ENV == 'production' ? 'compressed' : 'expanded')
+			outputStyle: (isProd ? 'compressed' : 'expanded')
 		}).on('error', plugins.sass.logError))
 		.pipe(plugins.bytediff.start())
 		.pipe(plugins.minifyCss())
@@ -104,7 +102,6 @@ gulp.task('test', appTest);
 
 gulp.task('watch:app', function () {
 	gulp.watch([pack.paths.src.app.scss], ['appSCSS']);
-	gulp.watch([pack.paths.src.app.js], ['appJS']);
 	return watchAppJS();
 });
 

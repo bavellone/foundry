@@ -2,16 +2,12 @@
 'use strict';
 
 import React from 'react';
-import validate from '../../../../common/validate';
+import validate from '../../shared/utils/validate';
 import q from 'q';
 import _ from 'lodash';
 
-export default function Form(Component, constraints, formOps) {
+export default function Form(Component, constraints, formOps = {}) {
 	return class Form extends React.Component {
-		constructor(props) {
-			super(props)
-		}
-
 		state = {
 			formData: {},
 			err: {
@@ -19,6 +15,7 @@ export default function Form(Component, constraints, formOps) {
 				messages: []
 			}
 		};
+    static fetchData = Component.fetchData;
 
 		static _validate = (data = {}, constraints = {}, ops = {}) => {
 			const err = validate(data, constraints, ops);
@@ -42,24 +39,27 @@ export default function Form(Component, constraints, formOps) {
 
 			return (event) => {
 				const val = (event.target ? (ops.checkbox ? event.target.checked : event.target.value) : event);
-
-				this.setState({
-					...this.state,
-					formData: {
-						[key]: val
-					}
-				});
-
+        
 				if (formOps.realtime)
-					this._submit();
+          this._submit({
+            ...this.state,
+            formData: {
+              ...this.state.formData,
+              [key]: val
+            }
+          });
 				else
-					this.setState({
-						...this.state,
-						err: {
-							fields: _.filter(this.state.err.fields, field => field != key),
-							messages: this.state.err.messages
-						}
-					})
+          this.setState({
+            ...this.state,
+            formData: {
+              ...this.state.formData,
+              [key]: val
+            },
+            err: {
+              fields: _.filter(this.state.err.fields, field => field != key),
+              messages: this.state.err.messages
+            }
+          })
 			}
 		};
 
@@ -113,18 +113,20 @@ export default function Form(Component, constraints, formOps) {
 		};
 
 		render() {
-			return (<Component
-				form={{
-					update: this._updateForm,
-					validate: Form._validate,
-					submit: this._submit,
-					hasError: this._hasError,
-					errors: this._getErrors,
-					setError: this._setError,
-					clearError: this._clearError
-				}}
-				{...this.props}
-			/>)
-		}
+      return (
+        <Component
+  				form={{
+  					update: this._updateForm,
+  					validate: Form._validate,
+  					submit: this._submit,
+  					hasError: this._hasError,
+  					errors: this._getErrors,
+  					setError: this._setError,
+  					clearError: this._clearError,
+            data: this.state.formData}}
+  				{...this.props}
+        />
+      )
+    }
 	}
 }

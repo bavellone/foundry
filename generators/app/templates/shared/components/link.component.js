@@ -8,10 +8,6 @@ import classnames from 'classnames';
 import _ from 'lodash';
 
 export default class MenuLink extends React.Component {
-	constructor(props) {
-		super(props);
-	}
-
 	static defaultProps = {
 		to: 'home',
 		text: 'Link',
@@ -29,4 +25,3 @@ export default class MenuLink extends React.Component {
 		);
 	}
 }
-

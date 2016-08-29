@@ -14,7 +14,7 @@ gulp.task('watch:test', function () {
 gulp.task('watch:server', function () {
 	return nodemon({
 		script: pack.main,
-		watch: ['server', 'server.js', 'common'],
+		watch: ['server', 'server.js', 'shared'],
 		env: process.env
 	})
 });

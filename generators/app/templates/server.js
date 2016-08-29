@@ -1,12 +1,12 @@
 /*eslint-env node*/
 require('babel-core/register')();
 
-var chalk = require('chalk');
-var config = require('./server/config');
-var debug = require('debug')('app:server');
-var fs = require('fs');
-var util = require('util');
-var Q = require('q');
+const chalk = require('chalk');
+const config = require('./server/config');
+const debug = require('debug')('app:server');
+const fs = require('fs');
+const util = require('util');
+const Q = require('q');
 
 Q.longStackSupport = (process.env.NODE_ENV == 'development');
 
@@ -19,41 +19,39 @@ fs.writeFile('server.pid', process.pid, (err) => {
 /**
  * App Setup
  */
+const app = module.exports = require('./server/app.js')(config);
+let server;
 
-var app = module.exports = require('./server/app.js')();
-var server = null;
-
-app.ready
-	.then(() => {
-		if (config.interface)
-			server = app.listen(config.port, config.interface, onListen);
-		else
-			server = app.listen(config.port, onListen);
-	});
+app.ready.then(() => {
+	if (config.interface)
+		server = app.listen(config.port, config.interface, onListen);
+	else
+		server = app.listen(config.port, onListen);
+});
 
 /**
  * Signal Handler definitions
  */
 
 function onListen() {
-	console.log(`${chalk.blue(config.app.title)} listening on port ${chalk.blue(config.port)} in ${chalk.blue(process.env.NODE_ENV || 'development')} mode`);
+	debug(`${chalk.blue(config.app.title)} listening on port ${chalk.blue(config.port)} in ${chalk.blue(process.env.NODE_ENV || 'development')} mode`);
 }
 
 function shutdown() {
-	debug("Received kill signal, shutting down gracefully.");
-	server.close(function () {
+	debug("Shutting down gracefully.");
+	server.close(() => {
 		debug("Closed out remaining connections.");
 		process.exit()
 	});
 
 	// if after 
-	setTimeout(function () {
-		debug("Could not close connections in time, forcefully shutting down");
+	setTimeout(() => {
+		debug("Could not close connections before timeout, forcefully shutting down");
 		process.exit()
 	}, 10 * 1000);
 }
 
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', err => {
 	console.error(chalk.red('Caught unhandled exception!'));
 	console.error(err);
 	throw err;
@@ -80,4 +78,3 @@ process.on('SIGPIPE', () => {
 
 	console.log(util.inspect(process.memoryUsage()));
 });
-

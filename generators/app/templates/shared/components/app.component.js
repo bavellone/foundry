@@ -6,10 +6,6 @@ import _ from 'lodash';
 class App extends React.Component {
 	static defaultProps = {};
 
-	constructor(props) {
-		super(props);
-	}
-
 	state = {};
 
 	_genLinks = () =>

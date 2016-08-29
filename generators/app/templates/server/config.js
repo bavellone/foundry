@@ -3,8 +3,8 @@ import _ from 'lodash';
 
 var all = {
 		app: {
-			title: '<%= appName %>',
-			namespace: '<%= appNS %>'
+			title: 'ImageProc',
+			namespace: 'imageProc'
 		},
 		interface: '127.0.0.1',
 		port: process.env.PORT || 80,
@@ -13,7 +13,8 @@ var all = {
 		dataDir: './data',
 		connectionPool: 1000,
 		api: {
-			path: '/api'
+			path: '/api',
+      enable: true
 		},
 		auth: {
 			saltWorkFactor: 10,
@@ -21,9 +22,6 @@ var all = {
 				secretKey: './config/token.key',
 				publicKey: './config/token.pub'
 			}
-		},
-		enable: {
-			api: true
 		},
 		mail: {
 			apiKey: process.env.MAIL_API_KEY,
@@ -38,17 +36,17 @@ var all = {
 	production = {
 		dataDir: '/data',
 		interface: '0.0.0.0',
-		db: process.env.DB_URI || '<%= dbProto %>://db:<%= dbPort %>',
+		db: process.env.DB_URI || 'bolt://db:7687',
 		port: process.env.PORT || 80
 	},
 	development = {
 		dataDir: './data',
-		db: process.env.DB_URI || '<%= dbProto %>://localhost:<%= dbPort %>',
+		db: process.env.DB_URI || 'bolt://localhost:7687',
 		port: process.env.PORT || 8888
 	},
 	testing = {
 		dataDir: './data',
-		db: '<%= dbProto %>://localhost:1<%= dbPort %>',
+		db: 'bolt://localhost:7687',
 		port: process.env.PORT || randomInt(10000, 50000)
 	};
 

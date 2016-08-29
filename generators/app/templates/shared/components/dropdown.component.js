@@ -7,10 +7,6 @@ import classnames from 'classnames';
 import _ from 'lodash';
 
 export default class Dropdown extends React.Component {
-	constructor(props) {
-		super(props)
-	}
-	
 	static defaultProps = {
 		items: [],
 		itemID: 'id',
@@ -22,12 +18,22 @@ export default class Dropdown extends React.Component {
 		allowAdditions: false,
 		searchDropdown: false,
 		button: false,
+    returnItem: false,
 		onChange: () => {}
 	};
 
 	componentDidMount() {
-		$(ReactDOM.findDOMNode(this)).dropdown({...this.props})
+		$(ReactDOM.findDOMNode(this)).dropdown({
+      ...this.props, 
+      onChange: this.onChange
+    })
 	}
+  
+  onChange = (v) => {
+    if (this.props.returnItem)
+      v = this.props.items.find(i => this.getItemVal(i) == v)
+    this.props.onChange(v);
+  }
 	
 	_classes = () => 
 		classnames('ui', this.props.classes, {
@@ -35,16 +41,22 @@ export default class Dropdown extends React.Component {
 			selection: this.props.searchDropdown,
 			button: this.props.button
 		}, 'dropdown');
+  
+  getItemVal = item => {
+    return item[this.props.itemVal || this.props.itemID]
+  }
 
 	render() {
-		
+    
 		if (this.props.selectDropdown)
 			return (
 				<select className={this._classes()}>
 					<option value="">{this.props.label}</option>
 					{this.props.items.map(item => {
 						return (<option key={item[this.props.itemID]}
-						                value={item[this.props.itemVal || this.props.itemID]}>{item[this.props.itemText]}</option>)
+						                value={this.getItemVal(item)}>
+                            {item[this.props.itemText]}
+                    </option>)
 					})}
 				</select>
 			);
@@ -66,7 +78,7 @@ export default class Dropdown extends React.Component {
 						return <div 
 							className='item' 
 							key={item[this.props.itemID]}
-						  data-value={item[ this.props.itemVal || this.props.itemID]}>
+						  data-value={this.getItemVal(item)}>
 							
 							{item[this.props.itemText]}
 						</div>
@@ -77,5 +89,3 @@ export default class Dropdown extends React.Component {
 		)
 	}
 }
-
-

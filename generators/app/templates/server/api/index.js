@@ -10,3 +10,5 @@ export default globMap('./server/api/*/', function (paths) {
 		app: paths.full + path.sep + 'app.js' // Path to app
 	};
 });
+
+export * from '../../shared/schemas';

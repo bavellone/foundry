@@ -7,6 +7,8 @@ import User from '../api/user/model';
 import {sign, verify} from './jwt';
 import {AuthDenied} from './errors';
 
+import debug from 'debug';
+const dbg = debug('app:lib:auth')
 
 /**
  * Reads token from incoming requests and saves it to req.token

@@ -7,7 +7,7 @@ const	debug = require('debug')('app:api');
 module.exports = function (app) {
 	var basePath = app.locals.config.api.path + '/';
 
-	if (app.locals.config.enable.api) {
+	if (app.locals.config.api.enable) {
 		app.locals.api = {};
 		app.locals.apiPath = basePath;
 
@@ -18,10 +18,9 @@ module.exports = function (app) {
 					app.locals.api[module.name] = basePath + module.name;
 					debug(`Initialized ${module.name}API...`);
 				})
-			
-		}), debug);
+		}), debug)
+      .then(() => app.db.models);
 	}
 	else
-		return debug('API disabled!') || Q.resolve();
+		return debug('API disabled!') || Q.resolve([]);
 };
-

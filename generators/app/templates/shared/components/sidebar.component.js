@@ -7,13 +7,9 @@ import classnames from 'classnames';
 import _ from 'lodash';
 
 //import {RxReact} from '../../lib/stream';
-import MenuLink from './link';
+import MenuLink from './link.component';
 
 class SidebarMenu extends React.Component {
-	constructor(props) {
-		super(props);
-	}
-
 	static defaultProps = {
 		animate: false,
 		visible: false,

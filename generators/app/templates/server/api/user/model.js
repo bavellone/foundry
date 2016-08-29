@@ -3,8 +3,9 @@
 
 import q from 'q';
 import bcrypt from 'bcryptjs';
+import omit from 'lodash/omit';
 
-import UserSchema from '../../../common/models/user';
+import UserSchema from '../../../shared/schemas/user.schema';
 
 let config = require('../../config');
 
@@ -14,11 +15,10 @@ export default class User extends UserSchema {
 			hashPass: true
 		}
 	};
-
 	static blacklist = ['password'];
-
+  
 	validate(ops = {hashPass: false}) {
-		return super.validate(ops)
+		return super.validate(omit(ops, ['hashPass']))
 			.then(data => { // Hash password
 				if (!ops.hashPass)
 					return data;

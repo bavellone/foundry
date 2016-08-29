@@ -96,9 +96,7 @@ function handleRequests(app) {
 	});
 
 	// Send 404 for any requests that don't match API or static routes
-	app.use((req, res) => {
-		res.status(404).send('Not Found');
-	});
+	app.use(errors.return404);
 
 	// Error handling
 	app.use(errors.catchAll);

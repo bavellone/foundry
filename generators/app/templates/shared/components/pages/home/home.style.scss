@@ -1,0 +1,106 @@
+
+.view.home {
+  height: 100%;
+}
+
+#toolbar {
+  display:flex;
+  padding: 1em;
+  flex-flow: column wrap;
+  
+  .toolbar-row {
+    display:flex;
+    flex:1;
+    flex-flow: row;
+    padding: 1em;
+    
+    &.spacious {
+      align-content: space-between;
+      justify-content: space-between;
+    }
+    
+    .items {
+      display: flex;
+      
+      flex: 1;
+      flex-flow:row wrap;
+      justify-content: flex-start;
+      align-content: stretch;
+      
+      .item {
+        flex:1;
+        min-width: 12.5%;
+max-width: 25%;
+        margin:1em 0;
+      }
+    }
+  }
+  
+  button {
+    font-size: 1.4em;
+    font-weight: bold;
+    
+    &.clear {
+      text-align: right;
+    }
+  }
+  
+  .items {
+    display: flex;
+    
+    flex: 1;
+    flex-flow:row wrap;
+    justify-content: space-between;
+    align-content: space-between;
+    
+    .item {
+      flex:1;
+    }
+  }
+}
+
+#workspace {
+  display: flex;
+  flex-direction: row;
+  
+  #transformations {
+    width: 300px;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+    .cards {
+      max-height: 400px;
+      overflow-y: auto;
+      flex-direction: row;
+      
+      .card {
+        overflow: hidden;
+        
+        @include animation('appear .4s ease');
+        
+        &.deleting {
+          @include animation('disappear .4s ease');
+        }
+      }
+      
+      .icon {
+        cursor: pointer;
+      }
+    }
+  }
+  
+  #image-container {
+    padding: 1em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    
+    img {
+      max-width: 600px;
+      max-height: 600px;
+    }
+  }
+  
+}

@@ -104,7 +104,7 @@ module.exports.return404 = function(req, res) {
   debug(`404 ${req.url}`)
   if (!res.headersSent)
     res.sendStatus(404)
-    .end();
+      .end();
   else
     res.end();
 };
@@ -237,8 +237,8 @@ module.exports.AuthDenied = AuthDenied;
 let RequestDataTooLarge = function(err) {
   Error.captureStackTrace(this, this.constructor);
   this.name = this.constructor.name;
-  this.desc = err.toString();
-  this.code = 412
+  this.desc = (err instanceof Error ? err.toString() : err);
+  this.code = 413
 };
 
 util.inherits(RequestDataTooLarge, BaseError);

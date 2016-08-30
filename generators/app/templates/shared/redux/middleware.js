@@ -1,9 +1,7 @@
 /*eslint-env browser,node*/
 import debug from 'debug';
-
-import {APIError} from '../utils/errors';
-
 const dbg = debug('app:redux');
+
 if (process.env.NODE_ENV == 'development')
   debug.enable("app:redux")
 
@@ -18,7 +16,7 @@ export const crashReporter = () => next => action => {
 	try {
 		return next(action)
 	} catch (err) {
-		console.error('Caught an exception!', err);
+		console.error('Caught an unhandled exception!', err);
 		throw err
 	}
 };
@@ -38,13 +36,7 @@ export function applyAPIMiddleware(api) {
       
       console.time('api')
       return apiCall(api)
-        .then(result => {
-          console.timeEnd('api');
-          if (result.ok)
-            return result.data;
-          else
-            return new APIError(result.problem, result.data);
-        })
+        .then(result => console.timeEnd('api') || result)
         .then(payload => dispatch({payload, type: SUCCESS}))
         .catch(error => {
           console.error('API ERROR:', error);

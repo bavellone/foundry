@@ -42,16 +42,13 @@ html, body {
 
 body {
 	position: relative;
+  font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
 }
 
 .overflow-ellipsis {
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
-}
-
-.link {
-	cursor: pointer;
 }
 
 .ui.container.nav-container {

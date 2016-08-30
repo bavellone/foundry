@@ -63,8 +63,6 @@ class BoltModel extends Model {
     let records = res.records;
 		if (records && !(records instanceof Array))
 			records = [records];
-    else
-      return [];
     
     var tmp;
 		return _.reduce(records, (rv, record) => {

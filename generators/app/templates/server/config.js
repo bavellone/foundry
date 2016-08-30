@@ -11,6 +11,7 @@ var all = {
 		deployPort: 8080,
 		assets: './assets',
 		dataDir: './data',
+    uploadDir: './data/uploads',
 		connectionPool: 1000,
 		api: {
 			path: '/api',

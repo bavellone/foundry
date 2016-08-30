@@ -8,6 +8,9 @@ export default class ImageSchema extends Schema {
 	static type = 'Image';
   static constraints = joi.object().keys({
     name: joi.string().required(),
-    size: joi.number().positive()
+    extension: joi.string(),
+    type: joi.string(),
+    size: joi.number().positive(),
+    path: joi.string()
   });
 }

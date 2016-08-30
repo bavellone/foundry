@@ -1,7 +1,13 @@
+/*eslint-env node*/
 import _ from 'lodash';
 import glob from 'glob';
 import path from 'path';
-import {MissingParameterError, MissingIDError} from './errors';
+import busboy from 'busboy';
+import fs from 'fs';
+import uuid from 'uuid';
+import mime from 'mime';
+
+import {MissingParameterError, MissingIDError, RequestDataTooLarge} from './errors';
 
 
 export function globMap(globPath, callback) {
@@ -56,4 +62,44 @@ export function ensureParamID() {
 			return next(new MissingIDError());
 		next();
 	}
+}
+
+export function handleUpload(limits) {
+  return (req, res, next) => {
+    let upload = new busboy({
+      headers: req.headers,
+      limits
+    });
+    req.files = [];
+    
+    upload
+      .on('file', (fieldname, file, filename, encoding, mimetype) => {
+        const filePath = path.join(
+          req.app.locals.config.uploadDir, 
+          `${uuid.v4()}.tmp`);
+        const storage = fs.createWriteStream(filePath);
+        
+        file
+          .on('limit', () => {
+            next(new RequestDataTooLarge(`Size limit: ${limits.fileSize/1024} KB`))
+            fs.unlink(filePath)
+          })
+          .on('end', () => req.files.push({
+              name: filename || 'file',
+              path: filePath,
+              extension: mime.extension(mimetype),
+              mimetype,
+              encoding
+            }))
+          .on('error', err => console.error(err))
+          .pipe(storage);
+      })
+      .on('field', (fieldname, val) => {
+        if (fieldname == 'data')
+          req.body = JSON.parse(val);
+      })
+      .on('finish', next);
+    
+    req.pipe(upload)
+  }
 }

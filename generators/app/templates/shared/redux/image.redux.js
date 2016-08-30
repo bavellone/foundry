@@ -7,6 +7,8 @@ import {ImageSchema} from '../schemas'
 export const OPERATION_ADD = 'IMAGE/OPERATION/ADD';
 export const OPERATION_REMOVE = 'IMAGE/OPERATION/REMOVE';
 
+export const IMAGE_SET = 'IMAGE/SET';
+
 export const IMAGE_LIST = 'IMAGE/LIST';
 export const IMAGE_LIST_REQUEST = 'IMAGE/LIST/REQUEST';
 export const IMAGE_LIST_SUCCESS = 'IMAGE/LIST/SUCCESS';
@@ -24,11 +26,7 @@ export const CLEAR_ALL_REQUEST = 'IMAGE/CLEAR_ALL/REQUEST';
 export const CLEAR_ALL_SUCCESS = 'IMAGE/CLEAR_ALL/SUCCESS';
 export const CLEAR_ALL_FAILURE = 'IMAGE/CLEAR_ALL/FAILURE';
 
-
-/**
- * Reducer
- */
-export default function reducer(state = {
+const initialState = {
   operations: [
     {id: 'avg', text: 'Blur', optionName: 'Radius', optionProps: {min:0}},
     {id: 'der', text: 'Derivative', optionName: 'Radius', optionProps: {min:0}},
@@ -36,9 +34,14 @@ export default function reducer(state = {
     {id: 'thresh', text: 'Threshold', optionName: 'Threshold', optionProps: {min:0, max:255}}
   ],
   pipeline: [],
-  image: {},
+  image: null,
   images: []
-}, action) {
+};
+
+/**
+ * Reducer
+ */
+export default function reducer(state = initialState, action) {
   return ({
     [OPERATION_ADD]: (state, transform) => ({
       ...state,
@@ -50,7 +53,8 @@ export default function reducer(state = {
     }),
     [IMAGE_LIST_SUCCESS]: (state, images) => ({
       ...state,
-      images
+      images,
+      image: state.image || images[0]
     }),
     [IMAGE_ADD_SUCCESS]: (state, image) => ({
       ...state,
@@ -61,16 +65,15 @@ export default function reducer(state = {
       ...state,
       error
     }),
+    [IMAGE_SET]: (state, image) => ({
+      ...state,
+      image
+    }),
     [IMAGE_REMOVE]: state => ({
       ...state,
-      image: {}
+      image: null
     }),
-    [CLEAR_ALL]: state => ({
-      ...state,
-      image: {},
-      pipeline: [],
-      images: []
-    })
+    [CLEAR_ALL_SUCCESS]: () => initialState
   }[action.type] || (state => state))(state, action.error || action.payload)
 }
 
@@ -96,15 +99,31 @@ export function listImages() {
     ))
 }
 
-export function addImage(image) {
+export function addImage(image, file) {
   return dispatch => 
     dispatch(createAPIAction(
       [IMAGE_ADD_REQUEST, IMAGE_ADD_SUCCESS, IMAGE_ADD_FAILURE], 
-      api => api.Image.create(
-        ImageSchema.sanitize(image, ImageSchema.constraints)
-      ),
+      api => {
+        if (process.browser) {
+          // TODO - Remove this tight coupling
+          const form = new FormData();
+          const data = ImageSchema.toJSON(image, ImageSchema.blacklist);
+          
+          console.log(file);
+          form.append('data', JSON.stringify(data));
+          form.append('file', file);
+          return api.Image.create(form)
+        }
+        else throw new Error('Should not upload image from redux on server!')
+      },
       image
     ))
+}
+
+export function setImage(image) {
+  return dispatch => {
+    dispatch(createAction(IMAGE_SET, image))
+  }
 }
 
 export function removeImage() {

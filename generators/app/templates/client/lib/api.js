@@ -20,11 +20,14 @@ export class CRUDAPI {
       }
     })
   }
-  static transformResponse = res => {
-    if (res.ok)
+  static transformResponse(res) {
+    if (CRUDAPI.isOK(res))
       return res.data;
-    throw new APIError(res.problem, res.data);
-  };
+    throw new APIError(res.statusText, res.data);
+  }
+  static isOK(res) {
+    return (res.status >= 200 && res.status < 300)
+  }
   get path() {
     return `/api/${this.model.type.toLowerCase()}`
   }

@@ -19,19 +19,10 @@
       justify-content: space-between;
     }
     
-    .items {
-      display: flex;
-      
-      flex: 1;
-      flex-flow:row wrap;
-      justify-content: flex-start;
-      align-content: stretch;
-      
-      .item {
-        flex:1;
-        min-width: 12.5%;
-max-width: 25%;
-        margin:1em 0;
+    .cards {
+      .card {
+        margin: 0.5% 0.5%;
+        width: 24%;
       }
     }
   }
@@ -42,19 +33,6 @@ max-width: 25%;
     
     &.clear {
       text-align: right;
-    }
-  }
-  
-  .items {
-    display: flex;
-    
-    flex: 1;
-    flex-flow:row wrap;
-    justify-content: space-between;
-    align-content: space-between;
-    
-    .item {
-      flex:1;
     }
   }
 }
@@ -68,7 +46,6 @@ max-width: 25%;
     padding: 1em;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     
     .cards {
       max-height: 400px;
@@ -98,8 +75,7 @@ max-width: 25%;
     flex-wrap: wrap;
     
     img {
-      max-width: 600px;
-      max-height: 600px;
+      max-width: 100%;
     }
   }
   

@@ -9,7 +9,7 @@ import Dropdown from '../../dropdown.component';
 import Form from '../../form.component';
 import Pipeline from '../../pipeline.component';
 
-import {addOperation, removeOperation, listImages, addImage, removeImage, clearAll} from '../../../redux'
+import {addOperation, removeOperation, listImages, addImage, setImage, uploadImage, removeImage, clearAll} from '../../../redux'
 
 export class Home extends React.Component {
   static propTypes = {
@@ -30,7 +30,9 @@ export class Home extends React.Component {
     return {
       addOperation: operation => dispatch(addOperation(operation)),
       removeOperation: operation => dispatch(removeOperation(operation)),
-      addImage: image => dispatch(addImage(image)),
+      addImage: (image, file) => dispatch(addImage(image, file)),
+      setImage: (image) => dispatch(setImage(image)),
+      uploadImage: (image, file) => dispatch(uploadImage(image, file)),
       removeImage: image => dispatch(removeImage(image)),
       clearAll: () => dispatch(clearAll())
     }
@@ -58,21 +60,11 @@ export class Home extends React.Component {
       return
     }
     
-    let reader = new FileReader();
-    reader.onload = e => this.props.addImage({
-        name: file.name,
-        size: file.size,
-        dataURI: e.target.result
-      });
-    reader.readAsDataURL(file);
-  }
-  
-  addImage = (name, dataURI, size) => {
     this.props.addImage({
-      dataURI,
-      name,
-      size
-    })
+      name: file.name,
+      size: file.size,
+      type: file.type
+    }, file);
   }
   
   addOperation = () => {
@@ -80,7 +72,8 @@ export class Home extends React.Component {
       const data = {
         type: this.data.operation.id,
         name: this.data.operation.text,
-        option: this.data.option
+        option: this.data.option,
+        id: Math.random() * 100
       };
       this.props.addOperation(data)
     }
@@ -113,12 +106,15 @@ export class Home extends React.Component {
 
         <div id="toolbar">
           <div className='toolbar-row'>
-            <div className="ui items">
+            <div className="ui link cards">
               {this.props.images.map(image => 
-                <div className="item" key={image.id}>
+                <div className="card" key={image.id} onClick={() => this.props.setImage(image)}>
+                  <div className="image">
+                    <img src={`/assets/uploads/${image.id}.${image.extension}`} alt={image.name}/>
+                  </div>
                   <div className="content">
                     <a href="#" className="header">{image.name}</a>
-                    <div className="meta"><span>{image.size / 1024}</span></div>
+                    <div className="meta"><span>{image.size / 1000}</span></div>
                   </div>
                 </div>
               )}
@@ -130,7 +126,7 @@ export class Home extends React.Component {
             />
             <button className="ui button load" onClick={e => this.fileInput.click(e)}>
               <span><i className='ui image icon'></i></span>
-              Load Image 
+              Load Image
             </button>
 
             <button className="ui button clear" onClick={this.props.clearAll}>
@@ -166,19 +162,19 @@ export class Home extends React.Component {
 
             </div>
             <Pipeline pipeline={this.props.pipeline} operations={this.props.operations}
-            onDelete={this.removeOperation}
+              onDelete={this.removeOperation}
             />
           </div>
           <div id="image-container">
-            <div>
+            {(!this.props.image ? null : (<div>
               <h1>{this.props.image.name}</h1>
-              <img src={this.props.image.dataURI} alt={this.props.image.name}/>
-            </div>
+              <img src={`/assets/uploads/${this.props.image.id}.${this.props.image.extension}`} alt={this.props.image.name}/>
+            </div>))}
           </div>
-
+          
         </div>
 
-		</div>
+      </div>
     );
 	}
 }

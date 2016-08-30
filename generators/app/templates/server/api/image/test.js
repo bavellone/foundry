@@ -5,7 +5,6 @@ import {getAPI, responses, genUserData, genImageData, newAuthAgent, generateCRUD
 describe('Image', () => {
   describe('API', () => {
     var imageData = genImageData();
-    console.log(imageData);
     // let req = newAgent();
     var agent = {};
     
@@ -17,22 +16,26 @@ describe('Image', () => {
         })
     )
     
-    generateCRUDTests(agent, 'image', imageData, genImageData)
+    // generateCRUDTests(agent, 'image', imageData, genImageData)
     
     it('should accept an integer value for size', (done) => {
+      const blob = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=', 'base64');
       agent.auth.post(getAPI('image'))
-        .send({...genImageData(),
+        .field('data', JSON.stringify({...genImageData(),
           size: 1024
-        })
+        }))
+        .attach('file', blob)
         .expect(200)
         .end(responses.end(done))
     });
     
     it('should accept a float value for size', (done) => {
+      const blob = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=', 'base64');
       agent.auth.post(getAPI('image'))
-        .send({...genImageData(),
+        .field('data', JSON.stringify({...genImageData(),
           size: 1024.55
-        })
+        }))
+        .attach('file', blob)
         .expect(200)
         .end(responses.end(done))
     });

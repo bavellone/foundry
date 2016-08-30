@@ -11,9 +11,6 @@ var path = require('path'),
 	dbgErr = debug('app:error'),
 	dbgReq = debug('app:request');
 
-import fs from 'fs';
-import Q from 'q';
-
 <% if (useDB) { %>
 import DB from './db';
 import DBAdapter from './db/<%= DBAdapterPath %>';<% } if (useAuth) { %>
@@ -50,10 +47,6 @@ module.exports = function (config) {
 	// Setup parsers
 	app.use(bodyParser.json());
 
-	app.use((err, req, res, next) => {
-		res.status(400).send('Malformed Request');
-	});
-
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({
 		extended: true
@@ -69,8 +62,7 @@ module.exports = function (config) {
   dbgInit('App configured');
 
   app.ready =	Promise.resolve()
-    .then(() => dbgInit('App initializing'))
-    <% if (useDB) { %>
+    .then(() => dbgInit('App initializing'))<% if (useDB) { %>
   	.then(app.db.connect())
   	.then(() => dbgInit('DB initialized!'))<% } %>
   	.then(() => app.db.connect())

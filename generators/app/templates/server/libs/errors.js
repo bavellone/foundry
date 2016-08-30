@@ -10,7 +10,9 @@ var _ = require('lodash'),
  * @param err
  */
 var wrap = function(err) {
-  if (err.code == 'Neo.ClientError.Schema.ConstraintViolation')
+  if (err instanceof BaseError)
+    return err
+  else if (err.code == 'Neo.ClientError.Schema.ConstraintViolation')
     return new Neo4jDuplicate(err);
   else if (err.code == 'Neo.ClientError.Statement.EntityNotFound')
     return new Neo4jNotFound(err);
@@ -23,10 +25,13 @@ var wrap = function(err) {
     _.includes(err, 'Database') ||
     _.includes(err, 'EPIPE'))
     return new DBConnectionError(err.toString());
-  else if (err instanceof BaseError)
-    return err
-  else
-    return debug(err, err.code) || new BaseError(err.code, 'Unknown', err.toString());
+  else if (err.toString().indexOf('request entity too large') !== -1) 
+    return new RequestDataTooLarge(err)
+  else {
+    debug(err)
+    debug(err.code, err.status, err.name)
+    return new BaseError(err.code, 'Unknown', err.toString());
+  }
 };
 
 module.exports.wrap = wrap;
@@ -46,11 +51,11 @@ function BaseError(code, name, desc) {
     return new BaseError(code, name, desc);
 
   var self = this;
-  if (_.isObject(code)) {
+  if (_.isObject(code)) 
     _.map(code, function(val, key) {
       self[key] = val;
     });
-  } else {
+  else {
     this.code = code;
     this.name = name;
     this.desc = desc;
@@ -78,6 +83,9 @@ module.exports.errors = {
   401: function(name, desc) { // Unauthorized
     return this.error(401, name, desc)
   },
+  requestTooLarge: function(desc) {
+    return this[400]('Request Data Too Large', desc)
+  },
   permissionDenied: function(desc) {
     return this[401]('Permission denied', desc)
   },
@@ -102,12 +110,10 @@ module.exports.return404 = function(req, res) {
 };
 
 module.exports.catchAll = function catchAll(err, req, res, next) {
-  if (err instanceof BaseError)
-    debug(`${err.name}: ${err.desc}`);
-  else {
-    debug(err);
-    debug(`${err.code}\n${err.stackTrace}`);
-  }
+  if (!(err instanceof BaseError))
+    err = wrap(err);
+  
+  debug(`${err.name}: ${err.desc}`);
 
   if (!res.headersSent) {
     res.status(err.code >= 100 && err.code <= 500 ? err.code : 500);
@@ -227,3 +233,13 @@ let AuthDenied = function(msg) {
 
 util.inherits(AuthDenied, BaseError);
 module.exports.AuthDenied = AuthDenied;
+
+let RequestDataTooLarge = function(err) {
+  Error.captureStackTrace(this, this.constructor);
+  this.name = this.constructor.name;
+  this.desc = err.toString();
+  this.code = 412
+};
+
+util.inherits(RequestDataTooLarge, BaseError);
+module.exports.RequestDataTooLarge = RequestDataTooLarge;

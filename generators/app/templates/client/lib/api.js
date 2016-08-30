@@ -1,6 +1,8 @@
 /*eslint-env browser,node*/
 
-import {create} from 'apisauce';
+import axios from 'axios';
+
+import {APIError} from '../../shared/utils/errors';
 import schemas from '../../shared/schemas';
 import debug from 'debug';
 
@@ -10,14 +12,19 @@ export class CRUDAPI {
   model = null;
   constructor(model) {
     this.model = model;
-    this.api = create({
+    this.api = axios.create({
       baseURL: this.path,
+      timeout: 3000,
       headers: {
         'X-Version': '1.0.0'
       }
     })
   }
-  static transformResponse = res => res.data;
+  static transformResponse = res => {
+    if (res.ok)
+      return res.data;
+    throw new APIError(res.problem, res.data);
+  };
   get path() {
     return `/api/${this.model.type.toLowerCase()}`
   }

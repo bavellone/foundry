@@ -49,9 +49,7 @@ export default function createReduxStore(initialState = {}, history, api) {
   );
 
   // Enable hot module replacement for reducers
-  if (process.env.NODE_ENV !== 'production' && module.onReload) {
-    console.log('hot');
-
+  if (process.env.NODE_ENV !== 'production' && module.onReload) 
     module.onReload(() => {
       store.replaceReducer(combineReducers({
         auth: require('./auth.redux.js'),
@@ -60,8 +58,6 @@ export default function createReduxStore(initialState = {}, history, api) {
       }));
       return true;
     });
-  }
-
 
   return store;
 }

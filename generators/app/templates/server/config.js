@@ -3,8 +3,8 @@ import _ from 'lodash';
 
 var all = {
 		app: {
-			title: 'ImageProc',
-			namespace: 'imageProc'
+			title: '<%= appName %>',
+			namespace: '<%= appNS %>'
 		},
 		interface: '127.0.0.1',
 		port: process.env.PORT || 80,

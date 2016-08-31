@@ -4,7 +4,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import classnames from 'classnames';
-import _ from 'lodash';
 
 export default class Dropdown extends React.Component {
 	static defaultProps = {

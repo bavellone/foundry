@@ -1,5 +1,4 @@
 
-export * from './app.component'
 export * from './containers'
 export * from './contentSegment.component'
 export * from './dropdown.component'

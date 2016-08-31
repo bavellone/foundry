@@ -2,9 +2,7 @@
 'use strict';
 
 import React from 'react';
-import {Link} from 'react-router';
 import classnames from 'classnames';
-import _ from 'lodash';
 
 //import {RxReact} from '../../lib/stream';
 import MenuLink from './link.component';

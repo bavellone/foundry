@@ -2,7 +2,7 @@
 'use strict';
 
 import React from 'react';
-import _ from 'lodash';
+import slice from 'lodash/slice';
 
 export default function List(Component) {
 	return class List extends React.Component {
@@ -15,7 +15,7 @@ export default function List(Component) {
 		};
 
 		_paginateItems = (items) => {
-			return _.slice(items, 
+			return slice(items, 
 				(this.state.page - 1) * this.props.pagination,
 				(this.state.page - 1) * this.props.pagination + this.props.pagination)
 		};

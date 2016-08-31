@@ -4,7 +4,8 @@
 import React from 'react';
 import validate from '../../shared/utils/validate';
 import q from 'q';
-import _ from 'lodash';
+import keys from 'lodash/keys';
+import reduce from 'lodash/reduce';
 
 export default function Form(Component, constraints, formOps = {}) {
 	return class Form extends React.Component {
@@ -20,8 +21,8 @@ export default function Form(Component, constraints, formOps = {}) {
 		static _validate = (data = {}, constraints = {}, ops = {}) => {
 			const err = validate(data, constraints, ops);
 			if (err) {
-				let fields = _.keys(err),
-					messages = _.reduce(err, (msgs, e) => {
+				let fields = keys(err),
+					messages = reduce(err, (msgs, e) => {
 						return msgs.concat(e);
 					}, []);
 
@@ -33,9 +34,10 @@ export default function Form(Component, constraints, formOps = {}) {
 		};
 
 		_updateForm = (key, ops) => {
-			ops = _.merge({
-				checkbox: false
-			}, ops);
+      ops = {
+				checkbox: false,
+        ...ops
+			};
 
 			return (event) => {
 				const val = (event.target ? (ops.checkbox ? event.target.checked : event.target.value) : event);

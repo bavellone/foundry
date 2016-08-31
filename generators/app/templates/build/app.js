@@ -6,25 +6,53 @@ var gulp = require('gulp'),
 	notifier = require('node-notifier'),
 	browserify = require('browserify'),
 	chalk = require('chalk'),
+	path = require('path'),
 	watchify = require('watchify'),
+  envify = require('loose-envify'),
 	babelify = require('babelify'),
+	uglifyify = require('uglifyify'),
 	livereactload = require('livereactload'),
 	source = require('vinyl-source-stream'),
 	buffer = require('vinyl-buffer'),
 	pack = require('../package'),
 	utils = require('./utils');
 
+var disc = require('disc')
+var fs = require('fs')
+
+module.exports = {
+	appJS: appJS,
+	analyzeAppJS: analyzeAppJS,
+	appSCSS: appSCSS
+};
+
 const isProd = (process.env.NODE_ENV === 'production');
 
 function createBundler(useWatchify, cb) {
-	return browserify({
+  const plugin = [];
+  
+  if (!isProd && useWatchify)
+    plugin.push(livereactload)
+  
+  let bundler = browserify({
 		entries: [pack.paths.dist.app.js.entryPoint],
 		extensions: ['.jsx'],
-    plugin: (isProd || !useWatchify ? [] : [livereactload]),
-		transform: [babelify],
-		debug: isProd,
+    plugin,
+		debug: !isProd,
 		cache: {}, packageCache: {}, fullPaths: !isProd
 	})
+    .transform(babelify, {
+      compact: true, 
+      sourceMaps: (isProd ? false : 'inline'),
+      minified: false,
+      comments: !isProd
+    })
+    .transform(envify);
+  
+  if (isProd)
+    bundler.transform(uglifyify, {global: true})
+  
+  return bundler
 		.external(pack.paths.src.vendor.deps.concat(pack.paths.src.vendor.libs))
 		.on('error', utils.onErr)
 		.on('end', () => cb ? cb() : null);
@@ -32,6 +60,20 @@ function createBundler(useWatchify, cb) {
 
 function appJS(cb) {
 	bundleApp(createBundler(false, cb))
+}
+
+function analyzeAppJS(cb) {
+	createBundler(false)
+    .bundle()
+		.on('error', utils.onErr)
+    .pipe(disc())
+    .pipe(fs.createWriteStream('assets/analysis.html'))
+    .on('finish', () => {
+      utils.spawnCmd({
+        cmd: 'chromium',
+        args: [path.resolve('assets/analysis.html')]
+      }).then(() => cb())
+    })
 }
 
 function watchAppJS() {
@@ -50,11 +92,11 @@ function bundleApp(b) {
 	var bundle = b.bundle()
 		.on('error', utils.onErr)
 		.pipe(source(pack.paths.dist.app.js.file));
-
+  
 	if (isProd || process.env.MINIFY == 'true')
 		bundle = bundle
 			.pipe(buffer())
-			.pipe(plugins.uglify());
+			.pipe(plugins.uglify()).on('error', utils.onErr);
 
 	return bundle
 		.pipe(gulp.dest(pack.paths.dist.app.js.dir))
@@ -95,6 +137,7 @@ function appTest() {
 }
 
 gulp.task('appJS', appJS);
+gulp.task('analyzeAppJS', analyzeAppJS);
 gulp.task('watchAppJS', watchAppJS);
 gulp.task('appSCSS', appSCSS);
 gulp.task('app', ['appJS', 'appSCSS']);
@@ -104,9 +147,3 @@ gulp.task('watch:app', function () {
 	gulp.watch([pack.paths.src.app.scss], ['appSCSS']);
 	return watchAppJS();
 });
-
-
-module.exports = {
-	appJS: appJS,
-	appSCSS: appSCSS
-};

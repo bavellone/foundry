@@ -28,7 +28,7 @@ Utils.onEnd = function (msg, color) {
 
 Utils.onErr = function (err) {
 	if (err) {
-		console.log(chalk.red(err.toString()));
+		console.error(err);
 		if (this.emit)
 			this.emit('end');
 	}

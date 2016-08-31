@@ -8,9 +8,9 @@ const opensslGenRSA = 'openssl genrsa | tee config/token.key | openssl rsa -pubo
 
 // Initialize the generator
 var Generator = module.exports = function Generator(args, options) {
-	yo.generators.Base.apply(this, arguments);
+	yo.Base.apply(this, arguments);
 };
-util.inherits(Generator, yo.generators.Base);
+util.inherits(Generator, yo.Base);
 
 // Prompt for some information about this app
 Generator.prototype.prompting =  function () {

@@ -16,20 +16,24 @@ import {
   crashReporter,
   applyAPIMiddleware
 } from './middleware';
+import devTools from './devTools';
 
-import auth from './auth.redux';
 export * from './auth.redux';
-
-import image from './image.redux';
 export * from './image.redux';
 
-const rootReducer = combineReducers({
-  auth,
-  image,
-  routing: routerReducer
-});
-
-const createEnhancers = (history, api) => {
+export function createEnhancers(history, api) {
+  if (process.env.NODE_ENV !== 'production')
+    return compose(
+      applyMiddleware(
+        thunk,
+        logger,
+        routerMiddleware(history),
+        applyAPIMiddleware(api),
+        crashReporter
+      ),
+      devTools.instrument()
+    );
+  
   return compose(
     applyMiddleware(
       thunk,
@@ -43,7 +47,7 @@ const createEnhancers = (history, api) => {
 
 export default function createReduxStore(initialState = {}, history, api) {
   const store = createStore(
-    rootReducer,
+    createRootReducer(),
     initialState,
     createEnhancers(history, api)
   );
@@ -51,13 +55,17 @@ export default function createReduxStore(initialState = {}, history, api) {
   // Enable hot module replacement for reducers
   if (process.env.NODE_ENV !== 'production' && module.onReload)
     module.onReload(() => {
-      store.replaceReducer(combineReducers({
-        auth: require('./auth.redux.js'),
-        image: require('./image.redux.js'),
-        routing: routerReducer
-      }));
+      store.replaceReducer(createRootReducer());
       return true;
     });
 
   return store;
+}
+
+export function createRootReducer() {
+  return combineReducers({
+    auth: require('./auth.redux').default,
+    image: require('./image.redux').default,
+    routing: routerReducer
+  })
 }

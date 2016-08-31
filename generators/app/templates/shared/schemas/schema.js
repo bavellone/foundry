@@ -6,7 +6,7 @@
 'use strict';
 
 import q from 'q';
-import omit from 'lodash/omit';
+// import omit from 'lodash/omit';
 
 import debug from 'debug';
 const dbg = debug('app:schema');

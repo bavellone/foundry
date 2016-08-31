@@ -1,5 +1,4 @@
 /*eslint-env browser */
-'use strict';
 
 import React from 'react';
 import { render } from 'react-dom';
@@ -29,4 +28,4 @@ render(
 function logPageView() {
     // ReactGA.set({ page: window.location.pathname });
     // ReactGA.pageview(window.location.pathname);
-};
+}

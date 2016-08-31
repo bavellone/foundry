@@ -1,6 +1,7 @@
 
-$primary-color: #3e7cba;
-$secondary-color: #2c5783;
+$primary-color: #2179fc;
+$secondary-color: #24e7df;
+$accent-color: #e5d258;
 $bg-color: #f2f2f2;
 
 $gray-bbb: #222;
@@ -38,11 +39,6 @@ $bp-xs: 640px;
 html, body {
 	min-height: 100%;
 	background-color: $bg-color;
-}
-
-body {
-	position: relative;
-  font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
 }
 
 .overflow-ellipsis {

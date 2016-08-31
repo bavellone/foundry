@@ -9,7 +9,7 @@ export default function HTMLDocument(props) {
   
   const foucStyles = `
   body, p, span, label, a {
-    font-family: Helvetica;
+    font-family: Lato,'Helvetica Neue',Helvetica,Arial,sans-serif;
   }
   `;
   

@@ -5,7 +5,6 @@ import React from 'react';
 import {Link} from 'react-router';
 //import {RxReact} from '../../lib/stream';
 import classnames from 'classnames';
-import _ from 'lodash';
 
 export default class MenuLink extends React.Component {
 	static defaultProps = {

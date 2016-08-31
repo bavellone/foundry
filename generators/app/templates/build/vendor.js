@@ -5,6 +5,9 @@ var gulp = require('gulp'),
 	}),
 	_ = require('lodash'),
 	browserify = require('browserify'),
+	babelify = require('babelify'),
+	uglifyify = require('uglifyify'),
+  envify = require('loose-envify'),
 	source = require('vinyl-source-stream'),
 	buffer = require('vinyl-buffer'),
 	utils = require('./utils'),
@@ -13,28 +16,45 @@ var gulp = require('gulp'),
 	fse = require('fs-extra'),
 	q = require('q');
 
+  var disc = require('disc')
+  var fs = require('fs')
+  
 module.exports = {
 	vendorCSS: vendorCSS,
 	vendorJS: vendorJS,
+	analyzeVendorJS: analyzeVendorJS,
 	vendorMisc: vendorMisc
 };
 gulp.task('vendor', ['vendorJS', 'vendorCSS', 'vendorMisc']);
 gulp.task('vendorMisc', vendorMisc);
 gulp.task('vendorCSS', vendorCSS);
 gulp.task('vendorJS', vendorJS);
+gulp.task('analyzeVendorJS', analyzeVendorJS);
 
-function vendorJS(cb) {
-	var b = browserify({
-		debug: process.env.NODE_ENV != 'production'
+const isProd = (process.env.NODE_ENV === 'production');
+
+function createVendorBundle() {
+  const deps = pack.paths.src.vendor.deps.concat(pack.paths.src.vendor.libs);
+  let bundler = browserify({
+		debug: !isProd,
+		cache: {}, packageCache: {}, fullPaths: !isProd
 	})
-		.on('error', utils.onErr);
+    .transform(babelify, {
+      compact: true, 
+      sourceMaps: (isProd ? false : 'inline'),
+      minified: false,
+      comments: !isProd
+    })
+    .transform(envify);
+  
+  if (isProd)
+    bundler.transform(uglifyify, {global: true})
+  
+  return bundler.require(deps).on('error', utils.onErr);
+}
 
-	var deps = pack.paths.src.vendor.deps
-		.concat(pack.paths.src.vendor.libs);
-
-	_.map(deps, function (id) {
-		b.require(id);
-	});
+function vendorJS() {
+	var b = createVendorBundle();
 
 	var stream = b.bundle()
 		.pipe(source(pack.paths.dist.vendor.js.file));
@@ -46,6 +66,21 @@ function vendorJS(cb) {
 
 	return stream.pipe(gulp.dest(pack.paths.dist.vendor.js.dir))
 		.on('end', utils.onEnd('VendorJS Bundled!', 'green'));
+}
+
+function analyzeVendorJS(cb) {
+	createVendorBundle()
+    .bundle()
+		.on('error', utils.onErr)
+    .pipe(disc())
+    .on('error', utils.onErr)
+    .pipe(fs.createWriteStream('assets/analysis.html'))
+    .on('finish', () => {
+      utils.spawnCmd({
+        cmd: 'chromium',
+        args: [path.resolve('assets/analysis.html')]
+      }).then(() => cb())
+    })
 }
 
 function vendorCSS(cb) {

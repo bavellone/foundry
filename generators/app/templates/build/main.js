@@ -4,7 +4,6 @@ var gulp = require('gulp'),
 	chalk = require('chalk'),
 	argv = require('yargs').argv,
 	pack = require('../package'),
-	spawn = require('child_process').spawn,
 	async = require('async'),
 	q = require('q'),
 	semver = require('semver'),
@@ -13,7 +12,11 @@ var gulp = require('gulp'),
 var app = require('./app');
 var vendor = require('./vendor');
 
+import {deploy, build, launch} from './scripts';
+
 gulp.task('deploy', deploy);
+gulp.task('buildContainer', build);
+gulp.task('launch', launch);
 gulp.task('hashPassword', hashPassword);
 
 gulp.task('clean', clean);
@@ -60,24 +63,6 @@ function bump() {
 	fse.writeJson('./package.json', pack, {spaces: 2});
 
 	console.log(chalk.green('Bumped to', pack.version));
-}
-
-function deploy(cb) {
-	let error = false;
-	console.log(chalk.green('Deploying version', pack.version, 'on port', config.deployPort));
-	spawn('./build/deploy.sh', [pack.namespace, pack.version, config.deployPort], {
-		stdio: 'inherit'
-	})
-		.on('error', function (err) {
-			error = true;
-			console.error(err);
-			cb(err);
-		})
-		.on('exit', function () {
-			if (!error)
-				console.log(chalk.green(`Deployment of version ${pack.version} successful!`));
-			cb();
-		})
 }
 
 function hashPassword(cb) {

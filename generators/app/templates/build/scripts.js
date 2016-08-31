@@ -6,40 +6,32 @@ var chalk = require('chalk'),
 
 import {spawnCmd} from './utils'
 
-export function deploy(cb) {
+export function deploy() {
   console.log(chalk.green(`Deploying image: ${pack.namespace} v${pack.version} on port ${config.deployPort}`));
   
-  spawnCmd({
+  return spawnCmd({
     cmd: './build/deploy.sh',
     args: [pack.namespace, pack.version, config.deployPort]
   }).then(() => {
     console.log(chalk.green(`Image ${pack.namespace} v${pack.version} deployed successfully!`));
-    cb();
-  }).catch(err => {
-    console.error(err);
-    cb(err);
   })
 }
 
-export function build(cb) {
+export function build() {
 	console.log(chalk.green(`Building image: ${pack.namespace} v${pack.version}`));
   
-  spawnCmd({
+  return spawnCmd({
     cmd: './build/build.sh',
     args: [pack.namespace, pack.version]
   }).then(() => {
     console.log(chalk.green(`Image ${pack.namespace} v${pack.version} built successfully!`));
-    cb();
-  }).catch(err => {
-    console.error(err);
-    cb(err);
   })
 }
 
-export function launch(cb) {
+export function launch() {
 	console.log(chalk.green(`Launching image: ${pack.namespace} v${pack.version}`));
   
-  spawnCmd({
+  return spawnCmd({
     cmd: 'sink',
     args: [`${pack.namespace}_web`]
   }).then(() =>
@@ -47,8 +39,7 @@ export function launch(cb) {
       cmd: 'docker',
       args: ['run', '--name', `${pack.namespace}_web`, '--restart=always', '-d', '-p', `127.0.0.1:${config.deployPort}:80`, `${pack.namespace}/web:latest`]
     })
-  ).then(() => console.log(chalk.green(`Image ${pack.namespace} v${pack.version} launched successfully!`))).catch(err => {
-    console.error(err);
-    cb(err);
+  ).then(() => {
+    console.log(chalk.green(`Image ${pack.namespace} v${pack.version} launched successfully!`))
   })
 }

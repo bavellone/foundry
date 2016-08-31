@@ -1,6 +1,5 @@
 /*eslint-env node */
 var notify = require('node-notifier'),
-	_ = require('lodash'),
 	config = require('../server/config'),
 	chalk = require('chalk'),
 	spawn = require('child_process').spawn,
@@ -36,10 +35,11 @@ Utils.onErr = function (err) {
 
 Utils.spawnCmd = function (task) {
 	return q.promise(function (resolve, reject) {
-		spawn(task.cmd, task.args, _.merge({}, {
+		spawn(task.cmd, task.args, {
 			stdio: 'inherit',
-			cwd: process.cwd()
-		}, task.ops || {}))
+			cwd: process.cwd(),
+      ...task.ops
+		})
 			.on('error', function (err) {
 				console.log(err);
 				reject(err);
